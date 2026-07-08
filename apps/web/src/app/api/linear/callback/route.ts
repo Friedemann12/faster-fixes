@@ -6,6 +6,10 @@ import {
   getLinearOAuthRedirectUri,
 } from "@/server/linear/linear-client";
 import { LINEAR_OAUTH_STATE_COOKIE } from "@/server/linear/oauth-state-cookie";
+import {
+  clearOAuthStateCookie,
+  isValidOAuthState,
+} from "@/server/oauth/state-cookie";
 import { prisma } from "@workspace/db";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -30,8 +34,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const stateCookie = req.cookies.get(LINEAR_OAUTH_STATE_COOKIE)?.value;
-  if (!stateCookie || stateCookie !== stateParam) {
+  if (!isValidOAuthState(req, LINEAR_OAUTH_STATE_COOKIE, stateParam)) {
     return NextResponse.redirect(`${integrationsUrl}?error=linear_state_mismatch`);
   }
 
@@ -112,6 +115,6 @@ export async function GET(req: NextRequest) {
   });
 
   const response = NextResponse.redirect(`${integrationsUrl}?linear=connected`);
-  response.cookies.delete(LINEAR_OAUTH_STATE_COOKIE);
+  clearOAuthStateCookie(response, LINEAR_OAUTH_STATE_COOKIE);
   return response;
 }
