@@ -1,0 +1,36 @@
+model JiraInstallation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Atlassian Cloud site the Organization mirrors Feedback into. `cloudId` is the
+  // opaque site identifier used as the base of every Jira REST call
+  // (api.atlassian.com/ex/jira/{cloudId}/...). Unique so a single Jira site maps
+  // to one Organization, mirroring LinearInstallation.linearOrgId.
+  cloudId  String @unique
+  siteUrl  String
+  siteName String
+
+  // 3LO tokens are bound to the authorizing user (ADR 0008), encrypted at rest
+  // with AES-256-GCM via jira/crypto.ts (ADR 0003). Atlassian rotates the refresh
+  // token on every use, so refresh must persist the new value atomically.
+  accessToken    String // ciphertext
+  refreshToken   String? // ciphertext
+  tokenScope     String
+  tokenExpiresAt DateTime?
+
+  // "connected" | "pending_site_selection" | "reconnect_required".
+  // pending_site_selection: the grant covered several sites and the user has not
+  // finalized which one to store. reconnect_required: refresh failed (revoked
+  // user access), the installation needs re-authorization (ADR 0008).
+  healthState String @default("connected")
+
+  installedById String?
+  installedBy   Member? @relation(fields: [installedById], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@map("jira_installation")
+}
