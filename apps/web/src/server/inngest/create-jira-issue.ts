@@ -1,5 +1,7 @@
-import { formatIssueTitle } from "@/server/github/format-issue-body";
-import { formatIssueAdf } from "@/server/jira/format-issue-adf";
+import {
+  formatIssueAdf,
+  formatJiraSummary,
+} from "@/server/jira/format-issue-adf";
 import {
   createJiraIssue as createIssue,
   JiraIssueConfigurationError,
@@ -94,7 +96,7 @@ export const createJiraIssue = inngest.createFunction(
       issue = await createIssue(accessToken, installation.cloudId, {
         jiraProjectId: link.jiraProjectId,
         issueTypeId: link.issueTypeId,
-        summary: formatIssueTitle(feedback.comment),
+        summary: formatJiraSummary(feedback.comment),
         description,
         labels: link.defaultLabels,
       });

@@ -3,6 +3,7 @@
 // structured JSON tree — Jira's v3 API rejects Markdown — so the two cannot share
 // a renderer. Keep the section order in sync when either side changes.
 
+import { formatIssueTitle } from "@/server/github/format-issue-body";
 import type { DiagnosticTrail } from "@fasterfixes/core";
 
 type AdfMark =
@@ -65,6 +66,16 @@ function paragraph(content: AdfNode[]): AdfNode {
 
 function bullet(content: AdfNode[]): AdfNode {
   return { type: "listItem", content: [paragraph(content)] };
+}
+
+/**
+ * Jira rejects a summary containing newline characters outright (400), unlike
+ * GitHub and Linear which accept them — so the comment is flattened to one line
+ * before the shared 80-char truncation. Truncating first would not help: a
+ * newline can sit anywhere inside the first 80 characters.
+ */
+export function formatJiraSummary(comment: string): string {
+  return formatIssueTitle(comment.replace(/\s+/g, " ").trim());
 }
 
 export function formatIssueAdf(feedback: FeedbackForJiraIssue): AdfDocument {

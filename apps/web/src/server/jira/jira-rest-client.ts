@@ -17,6 +17,11 @@ const FULFILLABLE_FIELD_IDS = new Set([
   "description",
 ]);
 
+// Fields Faster Fixes itself fills in the create payload. A 400 that names only
+// these is a bug in what we send, not drift in the customer's Jira configuration,
+// so it must surface as a failed run instead of silently flagging the link.
+const PAYLOAD_OWNED_FIELD_IDS = new Set(["summary", "description", "labels"]);
+
 // Jira caps project/search at 50 per page; loop rather than truncate so sites
 // with many projects still show all of them in the picker.
 const PROJECT_PAGE_SIZE = 50;
@@ -191,6 +196,21 @@ export async function findUnfulfillableRequiredFields(
     .map((field) => field.name);
 }
 
+// Jira reports create failures as `{"errors": {"<fieldId>": "<message>"}}`.
+function blamesOwnPayload(body: string): boolean {
+  try {
+    const parsed = JSON.parse(body) as { errors?: Record<string, string> };
+    const fieldIds = Object.keys(parsed.errors ?? {});
+    return (
+      fieldIds.length > 0 &&
+      fieldIds.every((fieldId) => PAYLOAD_OWNED_FIELD_IDS.has(fieldId))
+    );
+  } catch {
+    // An unparseable body tells us nothing; fall back to treating it as drift.
+    return false;
+  }
+}
+
 /**
  * Creates an issue and returns it with its resolved status category. The create
  * response carries only id/key/self, so the status is read back in a second call
@@ -228,14 +248,16 @@ export async function createJiraIssue(
       },
     );
   } catch (error) {
-    // 400 = payload rejected (a required field appeared, or the issue type no
-    // longer accepts it). 404 = the Jira project itself is gone or no longer
-    // visible to this grant. Both are link configuration drift, not transient.
+    // 404 = the Jira project is gone or no longer visible to this grant. 400 =
+    // the payload was rejected, which is configuration drift (a required field
+    // appeared, the issue type no longer accepts it) *unless* Jira blames only
+    // the fields we author — that is our bug, and must not be laundered into
+    // link ill-health where it would sit unnoticed.
     if (error instanceof JiraRequestError) {
       if (error.status === 404) {
         throw new JiraIssueConfigurationError("stale_project", error.body);
       }
-      if (error.status === 400) {
+      if (error.status === 400 && !blamesOwnPayload(error.body)) {
         throw new JiraIssueConfigurationError("stale_issue_type", error.body);
       }
     }
