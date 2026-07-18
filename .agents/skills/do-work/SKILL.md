@@ -14,6 +14,22 @@ Execute a complete unit of work: plan it, build it, validate it, commit it.
 
 Read any referenced plan or PRD. Explore the codebase to understand the relevant files, patterns, and conventions. If the task is ambiguous, ask the user to clarify scope before proceeding.
 
+#### Reading a GitHub issue
+
+Use `gh api --jq`, not `gh issue view` — long bodies get truncated.
+
+```bash
+gh api repos/OWNER/REPO/issues/N --jq '.body' > /tmp/issue-N.md
+```
+
+If the text ends in `... (truncated)`, page it in slices:
+
+```bash
+gh api repos/OWNER/REPO/issues/N --jq '.body[1200:2400]'
+```
+
+Read linked `## Parent` / `## Blocked by` issues the same way.
+
 ### 2. Plan the implementation (optional)
 
 If the task has not already been planned, create a plan for it.
