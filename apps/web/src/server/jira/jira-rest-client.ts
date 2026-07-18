@@ -32,6 +32,18 @@ export type JiraProjectSummary = {
   name: string;
 };
 
+export type JiraTransition = {
+  id: string;
+  toStatusName: string;
+  // "new" | "indeterminate" | "done".
+  toStatusCategory: string;
+  // Whether the transition screen exposes a resolution field at all. A workflow
+  // that doesn't ask for one rejects the payload if we send it anyway.
+  acceptsResolution: boolean;
+  // Resolution names the screen offers, when Jira reports them.
+  resolutionOptions: string[];
+};
+
 export type JiraIssueTypeSummary = {
   id: string;
   name: string;
@@ -61,6 +73,15 @@ type CreateIssueResponse = {
 type IssueStatusResponse = {
   // Jira's coarse categories: "new" | "indeterminate" | "done".
   fields: { status: { statusCategory: { key: string } } };
+};
+
+type TransitionsResponse = {
+  transitions: {
+    id: string;
+    to: { name: string; statusCategory: { key: string } };
+    // Present only with expand=transitions.fields; keyed by field id.
+    fields?: Record<string, { allowedValues?: { name?: string }[] }>;
+  }[];
 };
 
 type CreateMetaFieldsResponse = {
@@ -121,7 +142,9 @@ async function jiraRequest<T>(
     throw new JiraRequestError(res.status, await res.text(), path);
   }
 
-  return (await res.json()) as T;
+  // Transitions answer 204 with an empty body; res.json() would throw on it.
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export async function listJiraProjects(
@@ -194,6 +217,59 @@ export async function findUnfulfillableRequiredFields(
         !FULFILLABLE_FIELD_IDS.has(field.fieldId),
     )
     .map((field) => field.name);
+}
+
+/**
+ * Transitions available from the issue's *current* status. Jira has no way to set
+ * a status directly, and the reachable set depends on where the issue sits in an
+ * arbitrary per-project workflow, so this is queried fresh on every sync rather
+ * than cached against the link.
+ */
+export async function listJiraTransitions(
+  accessToken: string,
+  cloudId: string,
+  issueId: string,
+): Promise<JiraTransition[]> {
+  const data = await jiraRequest<TransitionsResponse>(
+    accessToken,
+    cloudId,
+    `/rest/api/3/issue/${encodeURIComponent(issueId)}/transitions?expand=transitions.fields`,
+  );
+
+  return data.transitions.map((transition) => {
+    const resolution = transition.fields?.resolution;
+    return {
+      id: transition.id,
+      toStatusName: transition.to.name,
+      toStatusCategory: transition.to.statusCategory.key,
+      acceptsResolution: !!resolution,
+      resolutionOptions: (resolution?.allowedValues ?? []).flatMap((value) =>
+        value.name ? [value.name] : [],
+      ),
+    };
+  });
+}
+
+export async function transitionJiraIssue(
+  accessToken: string,
+  cloudId: string,
+  issueId: string,
+  input: { transitionId: string; resolutionName?: string },
+): Promise<void> {
+  await jiraRequest<void>(
+    accessToken,
+    cloudId,
+    `/rest/api/3/issue/${encodeURIComponent(issueId)}/transitions`,
+    {
+      method: "POST",
+      body: {
+        transition: { id: input.transitionId },
+        ...(input.resolutionName
+          ? { fields: { resolution: { name: input.resolutionName } } }
+          : {}),
+      },
+    },
+  );
 }
 
 // Jira reports create failures as `{"errors": {"<fieldId>": "<message>"}}`.
