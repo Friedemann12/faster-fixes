@@ -3,6 +3,8 @@
 // installation's cloudId in the path (ADR 0008). Kept separate from jira-client.ts,
 // which only handles the auth.atlassian.com token dance.
 
+import type { AdfDocument } from "./format-issue-adf";
+
 const JIRA_API_GATEWAY = "https://api.atlassian.com/ex/jira";
 
 // Fields Faster Fixes populates when mirroring a Feedback. A required field
@@ -46,6 +48,16 @@ type CreateMetaIssueTypesResponse = {
   }[];
 };
 
+type CreateIssueResponse = {
+  id: string;
+  key: string;
+};
+
+type IssueStatusResponse = {
+  // Jira's coarse categories: "new" | "indeterminate" | "done".
+  fields: { status: { statusCategory: { key: string } } };
+};
+
 type CreateMetaFieldsResponse = {
   fields: {
     fieldId: string;
@@ -55,21 +67,53 @@ type CreateMetaFieldsResponse = {
   }[];
 };
 
+/**
+ * Jira rejected the create payload itself — a required field appeared after the
+ * link was made, or the issue type / project no longer accepts it. Retrying the
+ * same payload can never succeed, so callers surface this as link ill-health
+ * instead of burning the retry budget.
+ */
+export class JiraIssueConfigurationError extends Error {
+  constructor(
+    // Matches the ProjectJiraLink.linkHealthIssue vocabulary so callers can
+    // store it verbatim.
+    readonly reason: "stale_issue_type" | "stale_project",
+    readonly detail: string,
+  ) {
+    super(`Jira rejected the issue payload (${reason}): ${detail}`);
+    this.name = "JiraIssueConfigurationError";
+  }
+}
+
+class JiraRequestError extends Error {
+  constructor(
+    readonly status: number,
+    readonly body: string,
+    path: string,
+  ) {
+    super(`Jira request failed (${status}) for ${path}: ${body}`);
+    this.name = "JiraRequestError";
+  }
+}
+
 async function jiraRequest<T>(
   accessToken: string,
   cloudId: string,
   path: string,
+  init?: { method: "POST"; body: unknown },
 ): Promise<T> {
   const res = await fetch(`${JIRA_API_GATEWAY}/${cloudId}${path}`, {
+    method: init?.method ?? "GET",
     headers: {
       Authorization: `Bearer ${accessToken}`,
       Accept: "application/json",
+      ...(init ? { "Content-Type": "application/json" } : {}),
     },
+    ...(init ? { body: JSON.stringify(init.body) } : {}),
   });
 
   if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Jira request failed (${res.status}) for ${path}: ${text}`);
+    throw new JiraRequestError(res.status, await res.text(), path);
   }
 
   return (await res.json()) as T;
@@ -145,4 +189,68 @@ export async function findUnfulfillableRequiredFields(
         !FULFILLABLE_FIELD_IDS.has(field.fieldId),
     )
     .map((field) => field.name);
+}
+
+/**
+ * Creates an issue and returns it with its resolved status category. The create
+ * response carries only id/key/self, so the status is read back in a second call
+ * — the category is what the status-sync slice maps on, and guessing "new" would
+ * be wrong for workflows whose initial status sits in another category.
+ */
+export async function createJiraIssue(
+  accessToken: string,
+  cloudId: string,
+  input: {
+    jiraProjectId: string;
+    issueTypeId: string;
+    summary: string;
+    description: AdfDocument;
+    labels: string[];
+  },
+): Promise<{ id: string; key: string; statusCategory: string }> {
+  let created: CreateIssueResponse;
+  try {
+    created = await jiraRequest<CreateIssueResponse>(
+      accessToken,
+      cloudId,
+      "/rest/api/3/issue",
+      {
+        method: "POST",
+        body: {
+          fields: {
+            project: { id: input.jiraProjectId },
+            issuetype: { id: input.issueTypeId },
+            summary: input.summary,
+            description: input.description,
+            ...(input.labels.length > 0 ? { labels: input.labels } : {}),
+          },
+        },
+      },
+    );
+  } catch (error) {
+    // 400 = payload rejected (a required field appeared, or the issue type no
+    // longer accepts it). 404 = the Jira project itself is gone or no longer
+    // visible to this grant. Both are link configuration drift, not transient.
+    if (error instanceof JiraRequestError) {
+      if (error.status === 404) {
+        throw new JiraIssueConfigurationError("stale_project", error.body);
+      }
+      if (error.status === 400) {
+        throw new JiraIssueConfigurationError("stale_issue_type", error.body);
+      }
+    }
+    throw error;
+  }
+
+  const detail = await jiraRequest<IssueStatusResponse>(
+    accessToken,
+    cloudId,
+    `/rest/api/3/issue/${encodeURIComponent(created.id)}?fields=status`,
+  );
+
+  return {
+    id: created.id,
+    key: created.key,
+    statusCategory: detail.fields.status.statusCategory.key,
+  };
 }

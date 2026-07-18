@@ -1,5 +1,6 @@
 import { inngest } from "@/server/inngest";
 import { createGitHubIssue } from "@/server/inngest/create-github-issue";
+import { createJiraIssue } from "@/server/inngest/create-jira-issue";
 import { createLinearIssue } from "@/server/inngest/create-linear-issue";
 import { handleLinearOAuthRevoked } from "@/server/inngest/handle-linear-oauth-revoked";
 import { notifySlackFeedbackCreated } from "@/server/inngest/notify-slack-feedback-created";
@@ -24,6 +25,7 @@ export const { GET, POST, PUT } = serve({
     syncLinearIssueStatus,
     syncFeedbackStatusToLinear,
     handleLinearOAuthRevoked,
+    createJiraIssue,
     sendWelcomeEmail,
     notifySlackFeedbackCreated,
     updateSlackFeedbackMessage,

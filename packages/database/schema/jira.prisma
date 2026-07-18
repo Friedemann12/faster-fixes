@@ -69,7 +69,40 @@ model ProjectJiraLink {
 
   linkHealthIssue String? // null=healthy, "stale_issue_type" | "stale_project"
 
+  feedbackIssueLinks FeedbackJiraIssueLink[]
+
   @@index([jiraInstallationId])
   @@index([jiraProjectId])
   @@map("project_jira_link")
+}
+
+model FeedbackJiraIssueLink {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  feedbackId String   @unique
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  projectJiraLinkId String
+  projectJiraLink   ProjectJiraLink @relation(fields: [projectJiraLinkId], references: [id], onDelete: Cascade)
+
+  // `issueId` is the sync key: Jira reissues the key (PAY-123 -> ENG-45) when an
+  // issue moves between projects, but the id never changes. `issueKey` is
+  // denormalized for display only and may go stale after a move.
+  issueId  String
+  issueKey String
+  issueUrl String
+
+  // Jira's coarse status category ("new" | "indeterminate" | "done"), not the
+  // per-project status name — the status-sync slice maps on the category so it
+  // works across arbitrary workflows.
+  issueStatusCategory String
+
+  lastSyncSource String?
+  lastSyncAt     DateTime?
+
+  @@index([projectJiraLinkId])
+  @@index([issueId])
+  @@map("feedback_jira_issue_link")
 }

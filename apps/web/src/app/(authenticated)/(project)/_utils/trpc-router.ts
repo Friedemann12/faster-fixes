@@ -1,4 +1,5 @@
 import { createIssueForFeedback } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/create-issue-for-feedback.trpc.mutation";
+import { createJiraIssueForFeedback } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/create-jira-issue-for-feedback.trpc.mutation";
 import { createLinearIssueForFeedback } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/create-linear-issue-for-feedback.trpc.mutation";
 import { updateFeedbackAssignee } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/update-feedback-assignee.trpc.mutation";
 import { updateFeedbackStatus } from "@/app/(authenticated)/(project)/inbox/_features/feedback-panel/update-feedback-status.trpc.mutation";
@@ -70,6 +71,7 @@ export const projectsRouter = router({
     bulkHardDelete: bulkHardDeleteFeedback,
     createIssue: createIssueForFeedback,
     createLinearIssue: createLinearIssueForFeedback,
+    createJiraIssue: createJiraIssueForFeedback,
   }),
   github: router({
     getLink: getProjectGitHubLink,
