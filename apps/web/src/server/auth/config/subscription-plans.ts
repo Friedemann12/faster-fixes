@@ -25,6 +25,7 @@ export const PLAN_LIMITS = {
     organizations: 1,
     githubIntegration: false,
     linearIntegration: false,
+    jiraIntegration: false,
     slackIntegration: false,
     whiteLabel: false,
   },
@@ -35,6 +36,7 @@ export const PLAN_LIMITS = {
     organizations: Infinity,
     githubIntegration: true,
     linearIntegration: true,
+    jiraIntegration: true,
     slackIntegration: true,
     whiteLabel: true,
   },
@@ -45,6 +47,7 @@ export const PLAN_LIMITS = {
     organizations: Infinity,
     githubIntegration: true,
     linearIntegration: true,
+    jiraIntegration: true,
     slackIntegration: true,
     whiteLabel: true,
   },
@@ -145,6 +148,11 @@ export const PLAN_FEATURES = {
     {
       id: "linear_integration",
       label: "Linear integration",
+      highlighted: false,
+    },
+    {
+      id: "jira_integration",
+      label: "Jira integration",
       highlighted: false,
     },
     {

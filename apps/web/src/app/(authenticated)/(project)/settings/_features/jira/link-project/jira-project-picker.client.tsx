@@ -1,0 +1,206 @@
+"use client";
+
+import { useTRPC } from "@/lib/trpc/trpc-client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@workspace/ui/components/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@workspace/ui/components/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import {
+  LinkJiraProjectSchema,
+  type LinkJiraProjectSchemaType,
+} from "./link-jira-project.schema";
+import type { ListAccessibleJiraProjectsOutput } from "./list-jira-projects.trpc.query";
+
+type JiraProjectPickerProps = {
+  projectId: string;
+  jiraProjects: ListAccessibleJiraProjectsOutput;
+};
+
+export function JiraProjectPicker({
+  projectId,
+  jiraProjects,
+}: JiraProjectPickerProps) {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const form = useForm<LinkJiraProjectSchemaType>({
+    resolver: zodResolver(LinkJiraProjectSchema),
+    defaultValues: {
+      projectId,
+      jiraProjectId: "",
+      jiraProjectKey: "",
+      jiraProjectName: "",
+      issueTypeId: "",
+      issueTypeName: "",
+      autoCreateIssues: true,
+      defaultLabels: ["faster-fixes"],
+    },
+  });
+
+  const jiraProjectId = form.watch("jiraProjectId");
+  const issueTypeId = form.watch("issueTypeId");
+
+  const issueTypesQuery = useQuery(
+    trpc.authenticated.projects.jira.listIssueTypes.queryOptions(
+      { projectId, jiraProjectId },
+      { enabled: !!jiraProjectId },
+    ),
+  );
+
+  const issueTypes = issueTypesQuery.data;
+
+  // "Bug" is the right default for feedback in almost every Jira project, so
+  // pre-select it once the types for the chosen project arrive.
+  useEffect(() => {
+    if (!issueTypes || issueTypeId) return;
+    const bug = issueTypes.find((type) => type.name === "Bug");
+    if (!bug) return;
+    form.setValue("issueTypeId", bug.id);
+    form.setValue("issueTypeName", bug.name);
+  }, [issueTypes, issueTypeId, form]);
+
+  const linkMutation = useMutation(
+    trpc.authenticated.projects.jira.linkProject.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.authenticated.projects.jira.getLink.queryKey({
+            projectId,
+          }),
+        });
+        toast.success("Jira project linked.");
+      },
+      onError: (error) => {
+        form.setError("root", { message: error.message });
+        toast.error(error.message);
+      },
+    }),
+  );
+
+  const onSubmit = (data: LinkJiraProjectSchemaType) => {
+    linkMutation.mutate(data);
+  };
+
+  return (
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+      >
+        <FormField
+          control={form.control}
+          name="jiraProjectId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Jira project</FormLabel>
+              <Select
+                value={field.value}
+                onValueChange={(value) => {
+                  const jiraProject = jiraProjects.find((p) => p.id === value);
+                  if (!jiraProject) return;
+                  field.onChange(jiraProject.id);
+                  form.setValue("jiraProjectKey", jiraProject.key);
+                  form.setValue("jiraProjectName", jiraProject.name);
+                  // Issue types are scoped to a Jira project; the previous
+                  // selection does not exist in the new one.
+                  form.setValue("issueTypeId", "");
+                  form.setValue("issueTypeName", "");
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Jira project" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {jiraProjects.map((jiraProject) => (
+                    <SelectItem key={jiraProject.id} value={jiraProject.id}>
+                      {jiraProject.key} · {jiraProject.name}
+                    </SelectItem>
+                  ))}
+                  {jiraProjects.length === 0 && (
+                    <SelectItem value="_empty" disabled>
+                      No Jira projects available
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {jiraProjectId && (
+          <FormField
+            control={form.control}
+            name="issueTypeId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Issue type</FormLabel>
+                <Select
+                  value={field.value}
+                  onValueChange={(value) => {
+                    const issueType = issueTypes?.find((t) => t.id === value);
+                    if (!issueType) return;
+                    field.onChange(issueType.id);
+                    form.setValue("issueTypeName", issueType.name);
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder={
+                          issueTypesQuery.isPending
+                            ? "Loading issue types..."
+                            : "Select an issue type"
+                        }
+                      />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {issueTypes?.map((issueType) => (
+                      <SelectItem key={issueType.id} value={issueType.id}>
+                        {issueType.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {form.formState.errors.root && (
+          <p className="text-destructive text-sm">
+            {form.formState.errors.root.message}
+          </p>
+        )}
+
+        <Button
+          type="submit"
+          disabled={linkMutation.isPending}
+          className="w-fit"
+        >
+          {linkMutation.isPending ? "Linking..." : "Link Jira project"}
+        </Button>
+      </form>
+    </Form>
+  );
+}
