@@ -9,9 +9,13 @@ import { getValidJiraAccessToken } from "./token-access";
 const WEBHOOK_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
- * Where Jira delivers this installation's webhooks. Jira only accepts a URL whose
- * domain matches the one declared on the OAuth app, so local development needs a
- * tunnel exposed through JIRA_WEBHOOK_BASE_URL.
+ * Where Jira delivers this installation's webhooks, supplied to Jira at
+ * registration time — unlike Connect apps, a 3LO app declares no base URL in the
+ * developer console, so this value is the only thing that routes deliveries.
+ *
+ * Atlassian must be able to reach it, which localhost is not, hence the
+ * JIRA_WEBHOOK_BASE_URL override for tunnelled local development. Production
+ * falls through to the app's own public URL.
  */
 export function getJiraWebhookUrl(webhookToken: string): string {
   const base =
