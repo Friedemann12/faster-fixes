@@ -28,6 +28,11 @@ model JiraInstallation {
   // user access), the installation needs re-authorization (ADR 0008).
   healthState String @default("connected")
 
+  // When the organization was last emailed about a reconnect_required flip. Every
+  // failing sync re-reports the revocation, so without a marker the org would get
+  // one email per failure; set on notify, cleared whenever the token works again.
+  reconnectNotifiedAt DateTime?
+
   // Addresses this installation's inbound webhook endpoint (/api/webhooks/jira/{token}).
   // Jira Cloud dynamic webhooks are unsigned, so an unguessable URL is the only
   // thing standing between the endpoint and the open internet — hence a secret
@@ -68,13 +73,14 @@ model ProjectJiraLink {
   autoCreateIssues Boolean  @default(true)
   defaultLabels    String[] @default(["faster-fixes"])
 
-  // Registered up front so the status-sync slice can store its webhook without a
-  // second migration. Atlassian expires dynamic webhooks after 30 days unless
-  // refreshed, hence the expiry column. Unused until that slice lands.
+  // Atlassian expires dynamic webhooks 30 days after registration unless refreshed.
+  // The weekly refresh cron reads `webhookExpiresAt` to report how much runway is
+  // left and rewrites it with the expiry Jira returns on each refresh.
   webhookRegistrationId String?
   webhookExpiresAt      DateTime?
 
-  linkHealthIssue String? // null=healthy, "stale_issue_type" | "stale_project"
+  // null=healthy, "stale_issue_type" | "stale_project" | "webhook_refresh_failed".
+  linkHealthIssue String?
 
   feedbackIssueLinks FeedbackJiraIssueLink[]
 

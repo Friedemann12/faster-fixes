@@ -2,8 +2,11 @@ import { inngest } from "@/server/inngest";
 import { createGitHubIssue } from "@/server/inngest/create-github-issue";
 import { createJiraIssue } from "@/server/inngest/create-jira-issue";
 import { createLinearIssue } from "@/server/inngest/create-linear-issue";
+import { handleJiraOAuthRevoked } from "@/server/inngest/handle-jira-oauth-revoked";
 import { handleLinearOAuthRevoked } from "@/server/inngest/handle-linear-oauth-revoked";
 import { notifySlackFeedbackCreated } from "@/server/inngest/notify-slack-feedback-created";
+import { refreshJiraInstallationWebhooks } from "@/server/inngest/refresh-jira-installation-webhooks";
+import { refreshJiraWebhooks } from "@/server/inngest/refresh-jira-webhooks";
 import { sendWelcomeEmail } from "@/server/inngest/send-welcome-email";
 import { syncFeedbackStatusToGitHub } from "@/server/inngest/sync-feedback-status-to-github";
 import { syncFeedbackStatusToJira } from "@/server/inngest/sync-feedback-status-to-jira";
@@ -30,6 +33,9 @@ export const { GET, POST, PUT } = serve({
     createJiraIssue,
     syncJiraIssueStatus,
     syncFeedbackStatusToJira,
+    handleJiraOAuthRevoked,
+    refreshJiraWebhooks,
+    refreshJiraInstallationWebhooks,
     sendWelcomeEmail,
     notifySlackFeedbackCreated,
     updateSlackFeedbackMessage,

@@ -87,6 +87,10 @@ type RegisterWebhookResponse = {
   }[];
 };
 
+type RefreshWebhookResponse = {
+  expirationDate: string;
+};
+
 type TransitionsResponse = {
   transitions: {
     id: string;
@@ -123,7 +127,7 @@ export class JiraIssueConfigurationError extends Error {
   }
 }
 
-class JiraRequestError extends Error {
+export class JiraRequestError extends Error {
   constructor(
     readonly status: number,
     readonly body: string,
@@ -134,11 +138,21 @@ class JiraRequestError extends Error {
   }
 }
 
+/**
+ * A 401 means the grant itself is gone, not that this particular call was
+ * malformed — retrying cannot recover it, only re-authorization can. 403 is
+ * deliberately excluded: it means the authorizing user lacks a permission, which
+ * is a Jira-side configuration problem rather than a dead installation.
+ */
+export function isJiraUnauthorizedError(error: unknown): boolean {
+  return error instanceof JiraRequestError && error.status === 401;
+}
+
 async function jiraRequest<T>(
   accessToken: string,
   cloudId: string,
   path: string,
-  init?: { method: "POST" | "DELETE"; body: unknown },
+  init?: { method: "POST" | "PUT" | "DELETE"; body: unknown },
 ): Promise<T> {
   const res = await fetch(`${JIRA_API_GATEWAY}/${cloudId}${path}`, {
     method: init?.method ?? "GET",
@@ -351,6 +365,38 @@ export async function registerJiraWebhook(
   }
 
   return { webhookId: String(result.createdWebhookId) };
+}
+
+/**
+ * Pushes a registration's expiry back to 30 days from now. Refreshed one id at a
+ * time even though Jira accepts a batch: the endpoint answers 400 for the whole
+ * request when any id is unknown to the app, so a single stale registration would
+ * take every other link on the site down with it.
+ *
+ * Jira returns the new expiry rather than letting callers derive it, so the stored
+ * value tracks what Atlassian actually decided.
+ */
+export async function refreshJiraWebhook(
+  accessToken: string,
+  cloudId: string,
+  webhookId: string,
+): Promise<{ expiresAt: Date }> {
+  const response = await jiraRequest<RefreshWebhookResponse>(
+    accessToken,
+    cloudId,
+    "/rest/api/3/webhook/refresh",
+    { method: "PUT", body: { webhookIds: [Number(webhookId)] } },
+  );
+
+  const expiresAt = new Date(response.expirationDate);
+
+  if (Number.isNaN(expiresAt.getTime())) {
+    throw new Error(
+      `Jira returned an unparseable webhook expiry: ${response.expirationDate}`,
+    );
+  }
+
+  return { expiresAt };
 }
 
 export async function deleteJiraWebhook(

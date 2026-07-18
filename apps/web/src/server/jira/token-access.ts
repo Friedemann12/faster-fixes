@@ -1,3 +1,4 @@
+import { inngest } from "@/server/inngest";
 import { prisma } from "@workspace/db";
 import { decryptToken, encryptToken } from "./crypto";
 import { refreshAccessToken } from "./jira-client";
@@ -17,7 +18,7 @@ export class JiraNotConnectedError extends Error {
 // installation is flipped to `reconnect_required` so the UI can prompt a
 // re-authorization instead of failing silently (ADR 0008).
 export class JiraReauthRequiredError extends Error {
-  constructor() {
+  constructor(readonly installationId: string) {
     super("Jira installation requires re-authorization.");
     this.name = "JiraReauthRequiredError";
   }
@@ -60,6 +61,23 @@ export async function getValidJiraAccessToken(
     return decryptToken(installation.accessToken);
   }
 
+  try {
+    return await refreshUnderLock(organizationId);
+  } catch (error) {
+    // Emitted after the transaction has committed, so the handler reads the
+    // already-flipped row. Notifying from here rather than from each caller means
+    // no sync path can drop a revocation on the floor.
+    if (error instanceof JiraReauthRequiredError) {
+      await inngest.send({
+        name: "jira/oauth.revoked",
+        data: { installationId: error.installationId },
+      });
+    }
+    throw error;
+  }
+}
+
+function refreshUnderLock(organizationId: string): Promise<string> {
   return prisma.$transaction(async (tx) => {
     const rows = await tx.$queryRaw<LockedRow[]>`
       SELECT "id", "accessToken", "refreshToken", "tokenExpiresAt"
@@ -80,7 +98,7 @@ export async function getValidJiraAccessToken(
         where: { id: row.id },
         data: { healthState: "reconnect_required" },
       });
-      throw new JiraReauthRequiredError();
+      throw new JiraReauthRequiredError(row.id);
     }
 
     let refreshed;
@@ -91,7 +109,7 @@ export async function getValidJiraAccessToken(
         where: { id: row.id },
         data: { healthState: "reconnect_required" },
       });
-      throw new JiraReauthRequiredError();
+      throw new JiraReauthRequiredError(row.id);
     }
 
     await tx.jiraInstallation.update({
@@ -106,6 +124,9 @@ export async function getValidJiraAccessToken(
         tokenScope: refreshed.scope,
         tokenExpiresAt: new Date(Date.now() + refreshed.expires_in * 1000),
         healthState: "connected",
+        // Recovery re-arms the notification: a later revocation must be able to
+        // email the organization again.
+        reconnectNotifiedAt: null,
       },
     });
 

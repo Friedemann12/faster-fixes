@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/server/auth";
+import { inngest } from "@/server/inngest";
 import { getAccessibleResources } from "@/server/jira/jira-client";
 import { getValidJiraAccessToken } from "@/server/jira/token-access";
 import { protectedProcedure } from "@/server/trpc/trpc";
@@ -52,14 +53,23 @@ export const selectJiraSite = protectedProcedure
       });
     }
 
-    await prisma.jiraInstallation.update({
+    const installation = await prisma.jiraInstallation.update({
       where: { organizationId: activeOrganization.id },
       data: {
         cloudId: site.id,
         siteUrl: site.url,
         siteName: site.name,
         healthState: "connected",
+        reconnectNotifiedAt: null,
       },
+      select: { id: true },
+    });
+
+    // This is the second half of the reconnect flow for multi-site grants, so it
+    // owes the same webhook renewal the single-site callback does.
+    await inngest.send({
+      name: "jira/webhooks.refresh-requested",
+      data: { installationId: installation.id },
     });
 
     return { success: true };

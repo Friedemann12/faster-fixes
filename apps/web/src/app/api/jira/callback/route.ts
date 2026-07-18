@@ -1,4 +1,5 @@
 import { auth } from "@/server/auth";
+import { inngest } from "@/server/inngest";
 import { encryptToken } from "@/server/jira/crypto";
 import {
   exchangeOAuthCode,
@@ -107,14 +108,29 @@ export async function GET(req: NextRequest) {
     tokenScope: tokenResponse.scope,
     tokenExpiresAt: expiresAt,
     healthState,
+    // Reconnecting re-arms the revocation email for the next time it happens.
+    // Project links are untouched by this upsert, so sync resumes as it was.
+    reconnectNotifiedAt: null,
     installedById: membership.id,
   };
 
-  await prisma.jiraInstallation.upsert({
+  const installation = await prisma.jiraInstallation.upsert({
     where: { organizationId: activeOrganization.id },
     update: tokenFields,
     create: { organizationId: activeOrganization.id, ...tokenFields },
+    select: { id: true },
   });
+
+  // Registrations may have lapsed while the grant was dead — Jira expires them
+  // after 30 days regardless of why nobody refreshed them. Waiting for the weekly
+  // cron would leave inbound sync quiet for up to a week after a reconnect that
+  // the user was told resumes syncing, so renew (or re-register) immediately.
+  if (healthState === "connected") {
+    await inngest.send({
+      name: "jira/webhooks.refresh-requested",
+      data: { installationId: installation.id },
+    });
+  }
 
   const response = NextResponse.redirect(
     `${integrationsUrl}?jira=${singleSite ? "connected" : "select_site"}`,

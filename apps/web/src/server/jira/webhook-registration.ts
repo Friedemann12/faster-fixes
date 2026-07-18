@@ -1,6 +1,11 @@
 import { prisma } from "@workspace/db";
 import crypto from "crypto";
-import { deleteJiraWebhook, registerJiraWebhook } from "./jira-rest-client";
+import {
+  deleteJiraWebhook,
+  JiraRequestError,
+  refreshJiraWebhook,
+  registerJiraWebhook,
+} from "./jira-rest-client";
 import { getValidJiraAccessToken } from "./token-access";
 
 // Jira expires dynamic webhook registrations 30 days after creation and does not
@@ -104,6 +109,62 @@ export async function registerProjectJiraWebhook(
     data: {
       webhookRegistrationId: webhookId,
       webhookExpiresAt: new Date(Date.now() + WEBHOOK_TTL_MS),
+      ...(link.linkHealthIssue === "webhook_refresh_failed"
+        ? { linkHealthIssue: null }
+        : {}),
+    },
+  });
+}
+
+/**
+ * Extends one link's registration so inbound sync survives the 30-day cliff, and
+ * clears the health flag a previous failure may have set.
+ *
+ * Jira answers 400/404 for an id it no longer knows — the registration already
+ * expired, or someone deleted it in Jira. Refreshing cannot bring it back, so the
+ * link is re-registered instead; that is the difference between "inbound sync is
+ * quiet for a week" and "inbound sync is quiet forever".
+ *
+ * Throws on unauthorized and on any other failure: the caller distinguishes a dead
+ * grant (whole installation) from one bad link.
+ */
+export async function refreshProjectJiraWebhook(
+  link: {
+    id: string;
+    webhookRegistrationId: string;
+    linkHealthIssue: string | null;
+  },
+  accessToken: string,
+  cloudId: string,
+): Promise<void> {
+  let expiresAt: Date;
+
+  try {
+    ({ expiresAt } = await refreshJiraWebhook(
+      accessToken,
+      cloudId,
+      link.webhookRegistrationId,
+    ));
+  } catch (error) {
+    const isUnknownRegistration =
+      error instanceof JiraRequestError &&
+      (error.status === 400 || error.status === 404);
+
+    if (!isUnknownRegistration) throw error;
+
+    await registerProjectJiraWebhook(link.id);
+    return;
+  }
+
+  await prisma.projectJiraLink.update({
+    where: { id: link.id },
+    data: {
+      webhookExpiresAt: expiresAt,
+      // Only this slice's own flag is cleared; configuration drift recorded by the
+      // creation slice is unrelated and stays until the link is re-picked.
+      ...(link.linkHealthIssue === "webhook_refresh_failed"
+        ? { linkHealthIssue: null }
+        : {}),
     },
   });
 }

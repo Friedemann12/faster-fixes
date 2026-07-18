@@ -7,6 +7,21 @@ import { UnlinkJiraProjectButton } from "./unlink-project/unlink-jira-project-bu
 import { AutoCreateIssuesSwitch } from "./update-link/auto-create-issues-switch.client";
 import { DefaultLabelsEditor } from "./update-link/default-labels-editor.client";
 
+// Keyed on ProjectJiraLink.linkHealthIssue. Each reason gets its own copy because
+// the remedy differs: drift needs the link re-picked, a failed webhook refresh
+// clears itself on the next weekly run.
+const LINK_HEALTH_MESSAGES: Record<string, string> = {
+  stale_project:
+    "The linked Jira project is no longer reachable. Unlink and pick it again to resume creating issues.",
+  stale_issue_type:
+    "Jira rejected the issue type for this link, usually because a required field was added. Unlink and pick the issue type again.",
+  webhook_refresh_failed:
+    "Faster Fixes could not renew this link's Jira webhook, so status changes made in Jira are not syncing back. It is retried weekly; unlink and relink to fix it now.",
+};
+
+const FALLBACK_LINK_HEALTH_MESSAGE =
+  "This link needs attention. Unlink and pick the Jira project again to clear this warning.";
+
 type LinkedJiraProjectViewProps = {
   projectId: string;
   link: NonNullable<GetProjectJiraLinkOutput>;
@@ -21,10 +36,10 @@ export function LinkedJiraProjectView({
   return (
     <div className="flex flex-col gap-4">
       {link.linkHealthIssue && (
-        <Alert>
+        <Alert variant="destructive">
           <AlertDescription>
-            This link references a Jira project or issue type that no longer
-            exists. Unlink and pick them again to clear this warning.
+            {LINK_HEALTH_MESSAGES[link.linkHealthIssue] ??
+              FALLBACK_LINK_HEALTH_MESSAGE}
           </AlertDescription>
         </Alert>
       )}
