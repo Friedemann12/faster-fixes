@@ -9,9 +9,11 @@ const JIRA_ACCESSIBLE_RESOURCES_URL =
 // Scopes requested at install. `offline_access` is what makes Atlassian return a
 // refresh token; without it the connection would die at the first access-token
 // expiry. read/write:jira-work cover issue mirroring; read:jira-user is needed
-// later for attribution lookups.
+// later for attribution lookups. `manage:jira-webhook` is what lets a 3LO app
+// call the dynamic webhook API at all — without it registration 401s and inbound
+// status sync never starts, so installations predating it must re-authorize.
 export const JIRA_OAUTH_SCOPES =
-  "read:jira-work write:jira-work read:jira-user offline_access";
+  "read:jira-work write:jira-work read:jira-user manage:jira-webhook offline_access";
 
 export type JiraTokenResponse = {
   access_token: string;
