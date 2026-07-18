@@ -26,6 +26,10 @@ const PAYLOAD_OWNED_FIELD_IDS = new Set(["summary", "description", "labels"]);
 // with many projects still show all of them in the picker.
 const PROJECT_PAGE_SIZE = 50;
 
+// Only the two events inbound sync acts on. Subscribing to issue creation would
+// re-deliver every issue this app just created, for no gain.
+const WEBHOOK_EVENTS = ["jira:issue_updated", "jira:issue_deleted"];
+
 export type JiraProjectSummary = {
   id: string;
   key: string;
@@ -71,8 +75,16 @@ type CreateIssueResponse = {
 };
 
 type IssueStatusResponse = {
+  key: string;
   // Jira's coarse categories: "new" | "indeterminate" | "done".
-  fields: { status: { statusCategory: { key: string } } };
+  fields: { status: { name: string; statusCategory: { key: string } } };
+};
+
+type RegisterWebhookResponse = {
+  webhookRegistrationResult?: {
+    createdWebhookId?: number;
+    errors?: string[];
+  }[];
 };
 
 type TransitionsResponse = {
@@ -126,7 +138,7 @@ async function jiraRequest<T>(
   accessToken: string,
   cloudId: string,
   path: string,
-  init?: { method: "POST"; body: unknown },
+  init?: { method: "POST" | "DELETE"; body: unknown },
 ): Promise<T> {
   const res = await fetch(`${JIRA_API_GATEWAY}/${cloudId}${path}`, {
     method: init?.method ?? "GET",
@@ -273,6 +285,85 @@ export async function transitionJiraIssue(
 }
 
 // Jira reports create failures as `{"errors": {"<fieldId>": "<message>"}}`.
+/**
+ * Reads an issue's current status straight from Jira. Returns null when the issue
+ * is gone (404) — the inbound sync path treats that as a deletion.
+ *
+ * This is the "re-fetch before apply" primitive: Jira webhook payloads are
+ * unsigned, so the payload is only ever used to learn *which* issue to look at,
+ * never what its status is (ADR 0008 / PRD #7).
+ */
+export async function fetchJiraIssueStatus(
+  accessToken: string,
+  cloudId: string,
+  issueId: string,
+): Promise<{ key: string; statusName: string; statusCategory: string } | null> {
+  try {
+    const issue = await jiraRequest<IssueStatusResponse>(
+      accessToken,
+      cloudId,
+      `/rest/api/3/issue/${encodeURIComponent(issueId)}?fields=status`,
+    );
+
+    return {
+      key: issue.key,
+      statusName: issue.fields.status.name,
+      statusCategory: issue.fields.status.statusCategory.key,
+    };
+  } catch (error) {
+    if (error instanceof JiraRequestError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+/**
+ * Registers a dynamic webhook scoped to a single Jira project. Jira only accepts
+ * a URL under the domain declared on the OAuth app, and expires registrations
+ * after 30 days — the caller persists the returned id and expiry so the refresh
+ * cron can renew them before inbound sync goes quiet.
+ */
+export async function registerJiraWebhook(
+  accessToken: string,
+  cloudId: string,
+  input: { url: string; jqlFilter: string },
+): Promise<{ webhookId: string }> {
+  const response = await jiraRequest<RegisterWebhookResponse>(
+    accessToken,
+    cloudId,
+    "/rest/api/3/webhook",
+    {
+      method: "POST",
+      body: {
+        url: input.url,
+        webhooks: [{ jqlFilter: input.jqlFilter, events: WEBHOOK_EVENTS }],
+      },
+    },
+  );
+
+  const result = response.webhookRegistrationResult?.[0];
+
+  // Jira reports per-webhook failures inside a 200 response rather than a 4xx,
+  // so an unchecked result would silently leave the link without inbound sync.
+  if (!result?.createdWebhookId) {
+    throw new Error(
+      `Jira refused the webhook registration: ${result?.errors?.join(", ") ?? "no webhook id returned"}`,
+    );
+  }
+
+  return { webhookId: String(result.createdWebhookId) };
+}
+
+export async function deleteJiraWebhook(
+  accessToken: string,
+  cloudId: string,
+  webhookId: string,
+): Promise<void> {
+  await jiraRequest<void>(accessToken, cloudId, "/rest/api/3/webhook", {
+    method: "DELETE",
+    body: { webhookIds: [Number(webhookId)] },
+  });
+}
+
 function blamesOwnPayload(body: string): boolean {
   try {
     const parsed = JSON.parse(body) as { errors?: Record<string, string> };

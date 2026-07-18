@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/server/auth";
+import { deregisterProjectJiraWebhook } from "@/server/jira/webhook-registration";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 import { headers } from "next/headers";
@@ -34,6 +35,18 @@ export const disconnectJira = protectedProcedure.mutation(async ({ ctx }) => {
       code: "FORBIDDEN",
       message: "Only the organization owner can disconnect Jira.",
     });
+  }
+
+  // Deleting the installation cascades the Project links away, taking with them
+  // the only record of what to deregister — so the Jira-side webhooks go first,
+  // while the credentials to remove them still exist.
+  const links = await prisma.projectJiraLink.findMany({
+    where: { jiraInstallation: { organizationId: activeOrganization.id } },
+    include: { jiraInstallation: true },
+  });
+
+  for (const link of links) {
+    await deregisterProjectJiraWebhook(link);
   }
 
   // Atlassian has no public 3LO token-revocation endpoint; the user revokes

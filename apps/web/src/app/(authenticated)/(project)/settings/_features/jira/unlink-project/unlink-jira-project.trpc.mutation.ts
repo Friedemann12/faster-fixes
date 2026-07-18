@@ -1,5 +1,6 @@
 "use server";
 
+import { deregisterProjectJiraWebhook } from "@/server/jira/webhook-registration";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 import { z } from "zod";
@@ -34,6 +35,15 @@ export const unlinkJiraProject = protectedProcedure
         code: "FORBIDDEN",
         message: "Only owners and admins can unlink Jira projects.",
       });
+    }
+
+    const link = await prisma.projectJiraLink.findUnique({
+      where: { projectId: input.projectId },
+      include: { jiraInstallation: true },
+    });
+
+    if (link) {
+      await deregisterProjectJiraWebhook(link);
     }
 
     await prisma.projectJiraLink.deleteMany({

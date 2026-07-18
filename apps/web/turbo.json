@@ -11,6 +11,7 @@
 
         "BETTER_AUTH_SECRET",
         "BETTER_AUTH_URL",
+        "BASE_URL",
 
         "NEXT_PUBLIC_STRIPE_PUBLIC_KEY",
         "STRIPE_SECRET_KEY",
@@ -40,6 +41,7 @@
         "JIRA_CLIENT_SECRET",
         "JIRA_OAUTH_REDIRECT_URI",
         "JIRA_TOKEN_ENCRYPTION_KEY",
+        "JIRA_WEBHOOK_BASE_URL",
 
         "SLACK_CLIENT_ID",
         "SLACK_CLIENT_SECRET",

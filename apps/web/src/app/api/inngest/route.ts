@@ -9,6 +9,7 @@ import { syncFeedbackStatusToGitHub } from "@/server/inngest/sync-feedback-statu
 import { syncFeedbackStatusToJira } from "@/server/inngest/sync-feedback-status-to-jira";
 import { syncFeedbackStatusToLinear } from "@/server/inngest/sync-feedback-status-to-linear";
 import { syncGitHubIssueStatus } from "@/server/inngest/sync-github-issue-status";
+import { syncJiraIssueStatus } from "@/server/inngest/sync-jira-issue-status";
 import { syncLinearIssueStatus } from "@/server/inngest/sync-linear-issue-status";
 import { updateSlackFeedbackMessage } from "@/server/inngest/update-slack-feedback-message";
 import { serve } from "inngest/next";
@@ -27,6 +28,7 @@ export const { GET, POST, PUT } = serve({
     syncFeedbackStatusToLinear,
     handleLinearOAuthRevoked,
     createJiraIssue,
+    syncJiraIssueStatus,
     syncFeedbackStatusToJira,
     sendWelcomeEmail,
     notifySlackFeedbackCreated,

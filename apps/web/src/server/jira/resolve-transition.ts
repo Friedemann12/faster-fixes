@@ -1,4 +1,5 @@
-// Picks which Jira transition mirrors a Feedback status. Jira status *names* are
+// Translates between Feedback statuses and Jira workflow positions, in both
+// directions. Jira status *names* are
 // per-project and arbitrary, so the mapping keys on the status category — the one
 // primitive every workflow shares (ADR 0008 / PRD #7).
 
@@ -93,4 +94,18 @@ export function resolveJiraTransition(args: {
     toStatusCategory: chosen.toStatusCategory,
     resolutionName: pickResolutionName(chosen, feedbackStatus),
   };
+}
+
+/**
+ * The reverse mapping, for changes observed in Jira.
+ *
+ * To Do maps to `in_progress` rather than `new`, matching the GitHub/Linear reopen
+ * convention: `new` means "nobody has looked at this yet", which stops being true
+ * the moment someone moves the issue in Jira. Inbound sync therefore never
+ * resurrects a Feedback into the untriaged inbox.
+ */
+export function feedbackStatusFromJiraStatusCategory(
+  statusCategory: string,
+): FeedbackStatus {
+  return statusCategory === CATEGORY_DONE ? "resolved" : "in_progress";
 }

@@ -2,6 +2,7 @@
 
 import { findUnfulfillableRequiredFields } from "@/server/jira/jira-rest-client";
 import { getValidJiraAccessToken } from "@/server/jira/token-access";
+import { registerProjectJiraWebhook } from "@/server/jira/webhook-registration";
 import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
 import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
@@ -65,6 +66,18 @@ export const linkJiraProject = planAwareProcedure
         defaultLabels: input.defaultLabels,
       },
     });
+
+    // Inbound status sync is an enhancement, not a precondition for linking: a
+    // registration failure (Jira permissions, unreachable callback URL) still
+    // leaves outbound mirroring fully working, and the health cron retries.
+    try {
+      await registerProjectJiraWebhook(link.id);
+    } catch (error) {
+      console.error(
+        `[jira] webhook registration failed for project link ${link.id}`,
+        error,
+      );
+    }
 
     return { id: link.id };
   });
