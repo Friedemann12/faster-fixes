@@ -5,6 +5,7 @@ import { isCloud } from "@/utils/environment/env";
 import { AnimatedText } from "@workspace/ui/components/animated-text";
 import { Button } from "@workspace/ui/components/button";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
+import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { McpIcon } from "@workspace/ui/components/icons/mcp-icon";
 import { SlackIcon } from "@workspace/ui/components/icons/slack-icon";
@@ -49,6 +50,12 @@ const integrationLinks = [
     description:
       "Auto-create Linear issues from feedback, sync status both ways.",
     icon: <LinearIcon className="size-4 shrink-0" />,
+  },
+  {
+    href: "/integrations/jira",
+    label: "Jira",
+    description: "Auto-create Jira Cloud issues, sync status both ways.",
+    icon: <JiraIcon className="size-4 shrink-0" />,
   },
   {
     href: "/integrations/slack",
