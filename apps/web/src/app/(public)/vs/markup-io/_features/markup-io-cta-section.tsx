@@ -15,8 +15,8 @@ export function MarkupIoCtaSection() {
           </h2>
           <p className="text-muted-foreground mt-4 text-lg md:text-xl">
             Try FasterFixes free — open-source, self-hostable, $20 a month
-            flat, with GitHub and Linear sync on every plan and an MCP server
-            for your AI coding agent.
+            flat, with GitHub, Linear, and Jira sync on paid plans and an MCP
+            server for your AI coding agent.
           </p>
 
           <div className="mt-8 flex flex-col gap-4 sm:flex-row">

@@ -143,7 +143,7 @@ export const userbackFaqs: RichFaqItem[] = [
   {
     question: "How do I migrate from Userback?",
     answer:
-      "Export your feedback as CSV from Userback (Settings > Export), then deploy or sign up for FasterFixes, install the widget, and connect GitHub or Linear (or both). Note that video recordings, session replays, and survey responses do not migrate — FasterFixes does not support those features. The full 4-step guide is in the migration section above.",
+      "Export your feedback as CSV from Userback (Settings > Export), then deploy or sign up for FasterFixes, install the widget, and connect GitHub, Linear, and Jira (any combination) on a paid plan. Note that video recordings, session replays, and survey responses do not migrate — FasterFixes does not support those features. The full 4-step guide is in the migration section above.",
   },
   {
     question: "Is FasterFixes open source?",

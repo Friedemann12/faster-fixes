@@ -1,4 +1,5 @@
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
+import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { McpIcon } from "@workspace/ui/components/icons/mcp-icon";
 import { SlackIcon } from "@workspace/ui/components/icons/slack-icon";
@@ -6,6 +7,7 @@ import { DashboardSection } from "@/app/(authenticated)/_features/dashboard/dash
 import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
 import { AgentTokensSection } from "./_features/agent-tokens/agent-tokens-section.client";
 import { GitHubIntegrationSection } from "./_features/github/github-integration-section.client";
+import { JiraIntegrationSection } from "./_features/jira/jira-integration-section.client";
 import { LinearIntegrationSection } from "./_features/linear/linear-integration-section.client";
 import { SlackIntegrationSection } from "./_features/slack/slack-integration-section.client";
 
@@ -39,6 +41,20 @@ export default function IntegrationsPage() {
           cardClassName="lg:max-w-lg"
         >
           <LinearIntegrationSection />
+        </DashboardSection>
+
+        <DashboardSection
+          title={
+            <span className="flex items-center gap-2.5">
+              <JiraIcon colored className="size-6 shrink-0" />
+              Jira
+            </span>
+          }
+          description="Connect your Jira Cloud site to mirror feedback into Jira as issues."
+          cardTitle="Jira integration"
+          cardClassName="lg:max-w-lg"
+        >
+          <JiraIntegrationSection />
         </DashboardSection>
 
         <DashboardSection

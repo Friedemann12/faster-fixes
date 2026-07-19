@@ -28,7 +28,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Integrations (GitHub, Linear, Jira)",
     cells: [
-      { type: "yes", note: "GitHub + Linear included on every plan" },
+      { type: "yes", note: "GitHub, Linear, Jira included from $20/mo" },
       { type: "no", note: "Enterprise-only" },
     ],
   },

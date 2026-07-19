@@ -58,6 +58,13 @@ _Avoid_: Webhook (implementation detail), Sink.
 **Installation**:
 The org-level connection to an external system — a **Tracker** (`GitHubInstallation`, `LinearInstallation`) or a **Notification channel** (`SlackInstallation`). One per (Organization × external system).
 
+**Jira site**:
+The Jira Cloud instance an Organization connects to (e.g. `acme.atlassian.net`), identified by an Atlassian `cloudId`. The org-level scope of a Jira Installation — the analog of a Linear workspace or a GitHub account. One per Organization.
+_Avoid_: Jira instance, Jira workspace.
+
+**Jira project**:
+A project inside a Jira site (e.g. `PAY`). The per-Project tracker scope a Faster Fixes Project links to — the analog of a GitHub repo or a Linear team. Always written "Jira project" in full; bare "project" means a Faster Fixes Project.
+
 **Project link**:
 The project-level binding from a Faster Fixes Project to an external scope — a Tracker scope (a GitHub repo, a Linear team) or a Notification channel destination (a Slack channel). One per (Project × external system).
 

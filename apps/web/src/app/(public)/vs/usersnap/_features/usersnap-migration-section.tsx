@@ -13,7 +13,7 @@ export const migrationSteps = [
   },
   {
     label: "Invite your team and connect your issue tracker",
-    body: "Add team members from the dashboard and connect your GitHub repository, your Linear workspace, or both, for two-way issue sync. Configure @fasterfixes/mcp in your IDE or terminal to give your coding agent direct access to incoming feedback.",
+    body: "Add team members from the dashboard and connect your GitHub repository, your Linear workspace, your Jira Cloud site, or any combination, for two-way issue sync. Configure @fasterfixes/mcp in your IDE or terminal to give your coding agent direct access to incoming feedback.",
   },
 ];
 

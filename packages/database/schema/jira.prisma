@@ -1,0 +1,121 @@
+model JiraInstallation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Atlassian Cloud site the Organization mirrors Feedback into. `cloudId` is the
+  // opaque site identifier used as the base of every Jira REST call
+  // (api.atlassian.com/ex/jira/{cloudId}/...). Unique so a single Jira site maps
+  // to one Organization, mirroring LinearInstallation.linearOrgId.
+  cloudId  String @unique
+  siteUrl  String
+  siteName String
+
+  // 3LO tokens are bound to the authorizing user (ADR 0008), encrypted at rest
+  // with AES-256-GCM via jira/crypto.ts (ADR 0003). Atlassian rotates the refresh
+  // token on every use, so refresh must persist the new value atomically.
+  accessToken    String // ciphertext
+  refreshToken   String? // ciphertext
+  tokenScope     String
+  tokenExpiresAt DateTime?
+
+  // "connected" | "pending_site_selection" | "reconnect_required".
+  // pending_site_selection: the grant covered several sites and the user has not
+  // finalized which one to store. reconnect_required: refresh failed (revoked
+  // user access), the installation needs re-authorization (ADR 0008).
+  healthState String @default("connected")
+
+  // When the organization was last emailed about a reconnect_required flip. Every
+  // failing sync re-reports the revocation, so without a marker the org would get
+  // one email per failure; set on notify, cleared whenever the token works again.
+  reconnectNotifiedAt DateTime?
+
+  // Addresses this installation's inbound webhook endpoint (/api/webhooks/jira/{token}).
+  // Jira Cloud dynamic webhooks are unsigned, so an unguessable URL is the only
+  // thing standing between the endpoint and the open internet — hence a secret
+  // random value rather than the installation id. Nullable because it is minted
+  // on the first registration, not at install time.
+  webhookToken String? @unique
+
+  installedById String?
+  installedBy   Member? @relation(fields: [installedById], references: [id], onDelete: SetNull)
+
+  projectLinks ProjectJiraLink[]
+
+  @@index([organizationId])
+  @@map("jira_installation")
+}
+
+model ProjectJiraLink {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String  @unique
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  jiraInstallationId String
+  jiraInstallation   JiraInstallation @relation(fields: [jiraInstallationId], references: [id], onDelete: Cascade)
+
+  // Jira project the Faster Fixes Project mirrors into. `key` and `name` are
+  // denormalized so the settings UI can render the link without a Jira round-trip;
+  // they are refreshed whenever the link is re-picked.
+  jiraProjectId   String
+  jiraProjectKey  String
+  jiraProjectName String
+
+  issueTypeId   String
+  issueTypeName String
+
+  autoCreateIssues Boolean  @default(true)
+  defaultLabels    String[] @default(["faster-fixes"])
+
+  // Atlassian expires dynamic webhooks 30 days after registration unless refreshed.
+  // The weekly refresh cron reads `webhookExpiresAt` to report how much runway is
+  // left and rewrites it with the expiry Jira returns on each refresh.
+  webhookRegistrationId String?
+  webhookExpiresAt      DateTime?
+
+  // null=healthy, "stale_issue_type" | "stale_project" | "webhook_refresh_failed".
+  linkHealthIssue String?
+
+  feedbackIssueLinks FeedbackJiraIssueLink[]
+
+  @@index([jiraInstallationId])
+  @@index([jiraProjectId])
+  @@map("project_jira_link")
+}
+
+model FeedbackJiraIssueLink {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  feedbackId String   @unique
+  feedback   Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  projectJiraLinkId String
+  projectJiraLink   ProjectJiraLink @relation(fields: [projectJiraLinkId], references: [id], onDelete: Cascade)
+
+  // `issueId` is the sync key: Jira reissues the key (PAY-123 -> ENG-45) when an
+  // issue moves between projects, but the id never changes. `issueKey` is
+  // denormalized for display only and may go stale after a move.
+  issueId  String
+  issueKey String
+  issueUrl String
+
+  // Jira's coarse status category ("new" | "indeterminate" | "done"), not the
+  // per-project status name — the status-sync slice maps on the category so it
+  // works across arbitrary workflows.
+  issueStatusCategory String
+
+  lastSyncSource String?
+  lastSyncAt     DateTime?
+
+  @@index([projectJiraLinkId])
+  @@index([issueId])
+  @@map("feedback_jira_issue_link")
+}

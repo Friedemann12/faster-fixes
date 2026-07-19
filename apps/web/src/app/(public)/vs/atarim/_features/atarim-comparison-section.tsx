@@ -97,7 +97,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Project management integrations",
     cells: [
-      "GitHub + Linear · more coming",
+      "GitHub, Linear, Jira · more coming",
       "Jira, Asana, ClickUp, Monday, Trello, Slack, Figma, Zapier, +",
     ],
   },

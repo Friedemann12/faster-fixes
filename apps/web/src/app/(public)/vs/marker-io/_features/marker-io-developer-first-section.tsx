@@ -21,10 +21,10 @@ const points = [
     linkLabel: "Self-hosting guide",
   },
   {
-    title: "GitHub and Linear two-way sync",
-    body: "Each feedback item creates a GitHub issue or Linear ticket — your pick, or both — with the full structured report: screenshot, component path, selector, environment. Closing the issue resolves the feedback in FasterFixes, and vice versa. Linear sync maps by workflow-state type, so renamed states still work. More PM integrations are in progress.",
-    href: "/docs/integrations/linear" as Route,
-    linkLabel: "Linear integration",
+    title: "GitHub, Linear, and Jira two-way sync",
+    body: "Each feedback item creates a GitHub issue, Linear ticket, or Jira Cloud issue — your pick, or all three at once — with the full structured report: screenshot, component path, selector, environment. Closing the issue resolves the feedback in FasterFixes, and vice versa. Linear sync maps by workflow-state type and Jira sync by status category, so renamed states still work. More PM integrations are in progress.",
+    href: "/docs/integrations/jira" as Route,
+    linkLabel: "Jira integration",
   },
 ];
 

@@ -20,6 +20,7 @@ model Organization {
 
   gitHubInstallations GitHubInstallation[]
   linearInstallation  LinearInstallation?
+  jiraInstallation    JiraInstallation?
   slackInstallation   SlackInstallation?
 
   @@unique([slug])
@@ -40,6 +41,7 @@ model Member {
   assignedFeedback             Feedback[]
   gitHubInstallations          GitHubInstallation[]
   linearInstallationsInstalled LinearInstallation[]
+  jiraInstallationsInstalled   JiraInstallation[]
   slackInstallations           SlackInstallation[]
 
   @@index([organizationId])

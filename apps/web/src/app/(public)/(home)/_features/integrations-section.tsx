@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { GithubIcon } from "@workspace/ui/components/icons/github-icon";
+import { JiraIcon } from "@workspace/ui/components/icons/jira-icon";
 import { LinearIcon } from "@workspace/ui/components/icons/linear-icon";
 import { McpIcon } from "@workspace/ui/components/icons/mcp-icon";
 import { SlackIcon } from "@workspace/ui/components/icons/slack-icon";
@@ -34,6 +35,13 @@ const integrations: Integration[] = [
     description:
       "Auto-create Linear issues from feedback with full dev context. Status sync survives renamed and custom workflow states.",
     icon: <LinearIcon colored className="size-5 shrink-0" />,
+  },
+  {
+    label: "Jira integration",
+    href: "/integrations/jira" as Route,
+    description:
+      "Auto-create Jira Cloud issues from feedback with full dev context. Status sync keys on Jira's status category, so custom workflows keep working.",
+    icon: <JiraIcon colored className="size-5 shrink-0" />,
   },
   {
     label: "Slack integration",

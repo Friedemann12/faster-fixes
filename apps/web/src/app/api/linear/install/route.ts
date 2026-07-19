@@ -1,10 +1,10 @@
 import { auth } from "@/server/auth";
 import { getLinearOAuthRedirectUri } from "@/server/linear/linear-client";
+import { LINEAR_OAUTH_STATE_COOKIE } from "@/server/linear/oauth-state-cookie";
 import {
-  LINEAR_OAUTH_STATE_COOKIE,
-  LINEAR_OAUTH_STATE_COOKIE_MAX_AGE_S,
-} from "@/server/linear/oauth-state-cookie";
-import { randomBytes } from "crypto";
+  createOAuthState,
+  setOAuthStateCookie,
+} from "@/server/oauth/state-cookie";
 import { type NextRequest, NextResponse } from "next/server";
 
 const LINEAR_OAUTH_AUTHORIZE_URL = "https://linear.app/oauth/authorize";
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  const state = randomBytes(32).toString("hex");
+  const state = createOAuthState();
   const redirectUri = getLinearOAuthRedirectUri();
 
   const authorizeUrl = new URL(LINEAR_OAUTH_AUTHORIZE_URL);
@@ -46,12 +46,6 @@ export async function GET(req: NextRequest) {
   authorizeUrl.searchParams.set("actor", "app");
 
   const response = NextResponse.redirect(authorizeUrl.toString());
-  response.cookies.set(LINEAR_OAUTH_STATE_COOKIE, state, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: LINEAR_OAUTH_STATE_COOKIE_MAX_AGE_S,
-  });
+  setOAuthStateCookie(response, LINEAR_OAUTH_STATE_COOKIE, state);
   return response;
 }

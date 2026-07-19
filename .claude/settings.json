@@ -13,7 +13,6 @@
   "disableArtifact": true,
   "permissions": {
     "allow": [
-      "Write(src/**)",
       "Edit(src/**)",
       "Bash(git:*)",
       "Bash(pnpm:*)",
@@ -40,10 +39,6 @@
       "Edit(**/.env.*)",
       "Edit(.env)",
       "Edit(.env.*)",
-      "Write(**/.env)",
-      "Write(**/.env.*)",
-      "Write(.env)",
-      "Write(.env.*)",
       "Bash(cat *.env*)",
       "Bash(rm:*)",
       "Bash(rm -rf:*)",

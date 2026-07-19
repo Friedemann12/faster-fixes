@@ -93,7 +93,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Jira sync",
     cells: [
-      { type: "no", note: "GitHub & Linear today" },
+      { type: "yes", note: "Bidirectional · status-category aware" },
       { type: "partial", note: "Team plan and above" },
     ],
   },
@@ -111,7 +111,7 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Project management integrations",
     cells: [
-      "GitHub + Linear · more coming",
+      "GitHub, Linear, Jira · more coming",
       "Jira, Linear, Asana, ClickUp, Trello, Monday.com, +",
     ],
   },

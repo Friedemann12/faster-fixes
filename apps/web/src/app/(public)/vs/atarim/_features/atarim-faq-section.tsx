@@ -147,7 +147,7 @@ export const atarimFaqs: RichFaqItem[] = [
   {
     question: "How do I migrate from Atarim?",
     answer:
-      "Four steps: export open tasks from Atarim via CSV or your connected PM tool, deploy FasterFixes (self-hosted or hosted Pro), replace the Atarim JS snippet (or WordPress plugin) with @fasterfixes/react, then invite your team and connect GitHub or Linear for two-way sync. The full guide is in the migration section above.",
+      "Four steps: export open tasks from Atarim via CSV or your connected PM tool, deploy FasterFixes (self-hosted or hosted Pro), replace the Atarim JS snippet (or WordPress plugin) with @fasterfixes/react, then invite your team and connect GitHub, Linear, or Jira for two-way sync. The full guide is in the migration section above.",
   },
   {
     question: "Is FasterFixes open source?",

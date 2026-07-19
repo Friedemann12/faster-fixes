@@ -33,7 +33,7 @@ export function MarkupIoPricingSection() {
           <p className="text-muted-foreground mt-4 text-lg leading-relaxed">
             Markup.io raised Pro from $29 to $79 in January 2025 and removed
             its free plan. Integrations now require Enterprise. FasterFixes
-            includes GitHub and Linear sync on the $20/mo plan, and the
+            includes GitHub, Linear, and Jira sync on the $20/mo plan, and the
             self-hosted version is free.
           </p>
         </div>

@@ -7,6 +7,7 @@ import { AlertTriangleIcon } from "lucide-react";
 import { ApiKeyMigrationNotice } from "./api-key-migration-notice.client";
 import { DeleteProjectButton } from "./delete/delete-project-button.client";
 import { GitHubSection } from "./github/github-section.client";
+import { JiraSection } from "./jira/jira-section.client";
 import { LinearSection } from "./linear/linear-section.client";
 import { SlackSection } from "./slack/slack-section.client";
 import { UpdateProjectForm } from "./update/update-project-form.client";
@@ -52,6 +53,15 @@ export function ProjectSettingsTab({ projectId }: ProjectSettingsTabProps) {
         cardClassName="lg:max-w-lg"
       >
         <LinearSection projectId={projectId} />
+      </DashboardSection>
+
+      <DashboardSection
+        title="Jira"
+        description="Link a Jira project to mirror feedback into Jira as issues."
+        cardTitle="Jira integration"
+        cardClassName="lg:max-w-lg"
+      >
+        <JiraSection projectId={projectId} />
       </DashboardSection>
 
       <DashboardSection
