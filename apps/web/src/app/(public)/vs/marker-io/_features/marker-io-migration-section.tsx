@@ -9,11 +9,11 @@ export const migrationSteps = [
   },
   {
     label: "Import active feedback via the MCP",
-    body: "Connect @fasterfixes/mcp to your AI agent and point it at the Marker.io CSV. The agent parses the file and calls the create_feedbacks tool to bulk-import items — up to 100 per call, with original timestamps preserved and attributed to a named reviewer. The import skips integration fan-out, so migrated items do not open GitHub issues or Linear tickets.",
+    body: "Connect @fasterfixes/mcp to your AI agent and point it at the Marker.io CSV. The agent parses the file and calls the create_feedbacks tool to bulk-import items — up to 100 per call, with original timestamps preserved and attributed to a named reviewer. The import skips integration fan-out, so migrated items do not open issues in GitHub, Linear, or Jira.",
   },
   {
     label: "Know what you give up",
-    body: "Marker.io has features FasterFixes does not currently offer: session replay, video feedback, feedback on Figma / PDFs / images, browser extensions, Jira / Asana / ClickUp / Linear / Trello sync, a client-facing Guest Portal, and SSO. If those are core to your workflow, weigh them before switching.",
+    body: "Marker.io has features FasterFixes does not currently offer: session replay, video feedback, feedback on Figma / PDFs / images, browser extensions, Asana / ClickUp / Trello sync, a client-facing Guest Portal, and SSO. If those are core to your workflow, weigh them before switching.",
   },
 ];
 

@@ -54,7 +54,10 @@ const rows: { label: string; cells: [Cell, Cell] }[] = [
   {
     label: "Issue tracker sync",
     cells: [
-      { type: "yes", note: "GitHub + Linear — two-way, workflow-state aware" },
+      {
+        type: "yes",
+        note: "GitHub, Linear, Jira — two-way, workflow-state aware",
+      },
       { type: "yes", note: "Jira, Trello, ClickUp, Asana — link-back only" },
     ],
   },

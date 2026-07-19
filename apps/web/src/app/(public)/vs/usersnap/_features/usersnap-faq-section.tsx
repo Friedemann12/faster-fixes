@@ -139,7 +139,7 @@ export const usersnapFaqs: RichFaqItem[] = [
   {
     question: "How do I migrate from Usersnap to FasterFixes?",
     answer:
-      "Export your feedback data from Usersnap via CSV or API, then deploy FasterFixes (self-hosted or Pro). Replace the Usersnap widget with the FasterFixes React widget or HTML embed. Note that NPS and survey workflows do not migrate — FasterFixes does not support those features. Connect GitHub or Linear for two-way sync and configure @fasterfixes/mcp for your AI agent.",
+      "Export your feedback data from Usersnap via CSV or API, then deploy FasterFixes (self-hosted or Pro). Replace the Usersnap widget with the FasterFixes React widget or HTML embed. Note that NPS and survey workflows do not migrate — FasterFixes does not support those features. Connect GitHub, Linear, or Jira for two-way sync and configure @fasterfixes/mcp for your AI agent.",
   },
   {
     question: "Is FasterFixes open source?",
@@ -149,7 +149,7 @@ export const usersnapFaqs: RichFaqItem[] = [
   {
     question: "What is the FasterFixes Agency plan?",
     answer:
-      "The Agency plan costs $99/month and includes unlimited members, unlimited projects, MCP server access, GitHub and Linear two-way sync, team kanban, and email support. It is designed for agencies managing multiple client sites from a single workspace at a flat monthly rate.",
+      "The Agency plan costs $99/month and includes unlimited members, unlimited projects, MCP server access, GitHub, Linear, and Jira two-way sync, team kanban, and email support. It is designed for agencies managing multiple client sites from a single workspace at a flat monthly rate.",
   },
 ];
 

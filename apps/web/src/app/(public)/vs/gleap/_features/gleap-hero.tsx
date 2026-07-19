@@ -20,7 +20,7 @@ export function GleapHero() {
           <p className="text-muted-foreground mx-auto mt-6 max-w-2xl text-lg md:text-xl">
             Gleap has pivoted to AI customer support — Kai chatbot, ticketing,
             shared inbox, multichannel messaging. If you need structured bug
-            reports routed to GitHub, Linear, or your AI coding agent,
+            reports routed to GitHub, Linear, Jira, or your AI coding agent,
             FasterFixes is built for that workflow. No support platform
             overhead. No per-seat pricing.
           </p>

@@ -5,7 +5,7 @@ const fitPoints = [
   "You want AI coding agents — Claude Code, Cursor, Codex — to read and act on feedback directly from the terminal or IDE, without context-switching to a browser dashboard.",
   "You need to self-host: client feedback must stay in your own infrastructure, not a third-party cloud.",
   "You want flat pricing — one plan covers your whole team at a fixed monthly rate, not a per-seat bill that grows with every new member.",
-  "You don't need whitelabel or a client portal — you need structured, code-mapped feedback that goes straight into GitHub issues, Linear tickets, and your AI agent's context.",
+  "You don't need whitelabel or a client portal — you need structured, code-mapped feedback that goes straight into GitHub issues, Linear tickets, Jira issues, and your AI agent's context.",
 ];
 
 export function AtarimFitSection() {

@@ -13,7 +13,7 @@ const limitations = [
   },
   {
     title: "Built around QA and project management",
-    body: "Most BugHerd value lives in the management surface — kanban for clients, deep integrations with Jira, Asana, ClickUp, Monday.com, Linear. Genuinely useful for QA-led teams. Overhead if your day-to-day is the codebase.",
+    body: "Most BugHerd value lives in the management surface — kanban for clients, deep integrations with Asana, ClickUp, Monday.com, Trello. Genuinely useful for QA-led teams. Overhead if your day-to-day is the codebase.",
   },
 ];
 

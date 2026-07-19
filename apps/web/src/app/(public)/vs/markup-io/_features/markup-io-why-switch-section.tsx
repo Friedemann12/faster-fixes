@@ -5,7 +5,7 @@ const cards = [
   },
   {
     title: "No integrations unless you pay Enterprise",
-    body: "Jira, Linear, GitHub, Asana, and ClickUp are gated behind Enterprise pricing on Markup.io. The Pro plan ships feedback to a comments tab, not to your tracker. FasterFixes includes GitHub and Linear sync on every plan, free and paid.",
+    body: "Jira, Linear, GitHub, Asana, and ClickUp are gated behind Enterprise pricing on Markup.io. The Pro plan ships feedback to a comments tab, not to your tracker. FasterFixes includes GitHub, Linear, and Jira sync from the $20/mo plan.",
   },
   {
     title: "Chrome extension dependency",

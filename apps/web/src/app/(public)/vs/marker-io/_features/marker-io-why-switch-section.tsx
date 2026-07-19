@@ -13,7 +13,7 @@ const limitations = [
   },
   {
     title: "Built for QA reviewers, not the developer fixing the bug",
-    body: "Marker.io's workflow is optimized for project managers and QA — feedback lands in a dashboard, gets triaged, and eventually reaches a developer as a ticket. There is no path from client annotation to the editor or terminal. FasterFixes routes feedback to where developers work: GitHub issues or Linear tickets via two-way sync, or the terminal via @fasterfixes/mcp, where Claude Code, Cursor, or Codex can read the report and open a fix without leaving the editor.",
+    body: "Marker.io's workflow is optimized for project managers and QA — feedback lands in a dashboard, gets triaged, and eventually reaches a developer as a ticket. There is no path from client annotation to the editor or terminal. FasterFixes routes feedback to where developers work: GitHub, Linear, and Jira issues via two-way sync, or the terminal via @fasterfixes/mcp, where Claude Code, Cursor, or Codex can read the report and open a fix without leaving the editor.",
   },
 ];
 

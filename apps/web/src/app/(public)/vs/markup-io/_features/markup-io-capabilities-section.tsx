@@ -12,8 +12,8 @@ const cards = [
     body: "Every report includes the browser version, operating system, viewport dimensions, device pixel ratio, and console errors captured at submit time. No follow-up questions needed before a developer can reproduce.",
   },
   {
-    title: "Structured output to GitHub, Linear, or MCP",
-    body: "Each feedback item is a structured task. Sync to GitHub or Linear with workflow-state-aware two-way updates, or expose it to Claude Code, Cursor, and Codex via the built-in MCP server. Markup.io reserves integrations for Enterprise.",
+    title: "Structured output to GitHub, Linear, Jira, or MCP",
+    body: "Each feedback item is a structured task. Sync to GitHub, Linear, or Jira Cloud with workflow-state-aware two-way updates, or expose it to Claude Code, Cursor, and Codex via the built-in MCP server. Markup.io reserves integrations for Enterprise.",
   },
 ];
 

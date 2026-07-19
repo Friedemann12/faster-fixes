@@ -44,8 +44,8 @@ export function MarkerIoHonestTakeSection() {
                 Project-management integration breadth
               </strong>{" "}
               — Jira, Linear, Asana, ClickUp, Trello, Monday.com, Notion,
-              Basecamp, Wrike, Shortcut, and more. FasterFixes ships GitHub
-              and Linear two-way sync; more integrations are in progress.
+              Basecamp, Wrike, Shortcut, and more. FasterFixes ships GitHub,
+              Linear, and Jira two-way sync; more integrations are in progress.
             </li>
             <li>
               <strong className="text-foreground">Guest Portal</strong> —
@@ -66,9 +66,9 @@ export function MarkerIoHonestTakeSection() {
             </li>
           </ul>
           <p>
-            If your workflow centers on QA handoffs, client approvals,
-            Jira-heavy backlogs, or design-file annotation, Marker.io is the
-            more complete tool today. FasterFixes is built for a narrower
+            If your workflow centers on QA handoffs, client approvals, session
+            replay, or design-file annotation, Marker.io is the more complete
+            tool today. FasterFixes is built for a narrower
             brief — and we think it is the right brief for most developer
             teams shipping client websites:
           </p>

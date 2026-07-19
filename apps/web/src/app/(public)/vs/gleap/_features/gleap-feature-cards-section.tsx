@@ -9,7 +9,7 @@ const cards = [
   },
   {
     title: "Structured markdown output",
-    body: "Every report is formatted as a structured markdown task: title, steps to reproduce, browser and OS metadata, component context, screenshot reference. Ready to paste into a GitHub issue or Linear task — or consumed directly by an AI coding agent — without any reformatting.",
+    body: "Every report is formatted as a structured markdown task: title, steps to reproduce, browser and OS metadata, component context, screenshot reference. Ready to paste into a GitHub issue, Linear task, or Jira issue — or consumed directly by an AI coding agent — without any reformatting.",
   },
   {
     title: "Self-hosting",

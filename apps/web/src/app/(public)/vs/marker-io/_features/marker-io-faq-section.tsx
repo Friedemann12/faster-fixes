@@ -157,28 +157,29 @@ export const markerIoFaqs: RichFaqItem[] = [
   {
     question: "How do I move my Marker.io data over?",
     answer:
-      "Export your existing feedback as CSV from the Marker.io dashboard, set up a FasterFixes workspace (hosted or self-hosted), install the React widget in your project, and reconnect your GitHub and Linear integrations. Hand the export to your AI agent: the @fasterfixes/mcp create_feedbacks tool bulk-imports the items into FasterFixes, preserving original timestamps and attributing them to a named reviewer.",
+      "Export your existing feedback as CSV from the Marker.io dashboard, set up a FasterFixes workspace (hosted or self-hosted), install the React widget in your project, and reconnect your GitHub, Linear, and Jira integrations. Hand the export to your AI agent: the @fasterfixes/mcp create_feedbacks tool bulk-imports the items into FasterFixes, preserving original timestamps and attributing them to a named reviewer.",
   },
   {
     question:
-      "How do the FasterFixes GitHub and Linear integrations compare to Marker.io's Jira-heavy stack?",
+      "How do the FasterFixes integrations compare to Marker.io's Jira-heavy stack?",
     answer:
-      "FasterFixes ships two-way GitHub Issues and Linear sync on every paid plan, included by default. Marker.io supports both but is more deeply integrated with Jira — and Jira and Linear sync are gated behind the Team plan at $149/month annual. If your team works primarily in GitHub or Linear, FasterFixes is a more direct fit. If Jira is central to your workflow, Marker.io's Team plan is the better option today.",
+      "FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on every paid plan, included by default. A single feedback item can mirror to all three at once, and Jira sync maps by status category rather than status name, so custom workflows need no configuration. Marker.io gates Jira and Linear sync behind the Team plan at $149/month annual. Marker.io still covers a broader roster — Asana, ClickUp, Trello, Monday.com and more — so weigh that if your backlog lives elsewhere.",
     content: (
       <p className="text-muted-foreground text-lg md:text-xl">
-        FasterFixes ships two-way GitHub Issues and Linear sync on every paid
-        plan, included by default. Marker.io supports both but is more deeply
-        integrated with Jira — and Jira and Linear sync are gated behind the
-        Team plan at $149/month annual. If your team works primarily in GitHub
-        or Linear, FasterFixes is a more direct fit. If Jira is central to your
-        workflow, Marker.io&apos;s Team plan is the better option today. See
-        the{" "}
+        FasterFixes ships two-way GitHub Issues, Linear, and Jira Cloud sync on
+        every paid plan, included by default. A single feedback item can mirror
+        to all three at once, and Jira sync maps by status category rather than
+        status name, so custom workflows need no configuration. Marker.io gates
+        Jira and Linear sync behind the Team plan at $149/month annual.
+        Marker.io still covers a broader roster — Asana, ClickUp, Trello,
+        Monday.com and more — so weigh that if your backlog lives elsewhere.
+        See the{" "}
         <DocLink href={"/docs/integrations/github" as Route}>
           GitHub integration docs
         </DocLink>{" "}
         and{" "}
-        <DocLink href={"/docs/integrations/linear" as Route}>
-          Linear integration docs
+        <DocLink href={"/docs/integrations/jira" as Route}>
+          Jira integration docs
         </DocLink>
         .
       </p>
