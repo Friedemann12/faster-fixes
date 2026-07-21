@@ -51,6 +51,12 @@ export type UpdateContactOptions = {
   data?: Record<string, unknown>;
 };
 
+export type AddContactToSegmentOptions = {
+  id?: string;
+  email?: string;
+  segmentId: string;
+};
+
 export interface Mailer {
   emails: {
     send(options: MailOptions): Promise<EmailResponse>;
@@ -61,5 +67,6 @@ export interface Mailer {
     get(id: string): Promise<Contact>;
     update(options: UpdateContactOptions): Promise<Contact>;
     delete(id: string): Promise<Contact>;
+    addToSegment(options: AddContactToSegmentOptions): Promise<void>;
   };
 }

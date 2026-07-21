@@ -1,4 +1,5 @@
 import { inngest } from "@/server/inngest";
+import { addContactToSegment } from "@/server/inngest/add-contact-to-segment";
 import { createGitHubIssue } from "@/server/inngest/create-github-issue";
 import { createJiraIssue } from "@/server/inngest/create-jira-issue";
 import { createLinearIssue } from "@/server/inngest/create-linear-issue";
@@ -37,6 +38,7 @@ export const { GET, POST, PUT } = serve({
     refreshJiraWebhooks,
     refreshJiraInstallationWebhooks,
     sendWelcomeEmail,
+    addContactToSegment,
     notifySlackFeedbackCreated,
     updateSlackFeedbackMessage,
   ],

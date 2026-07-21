@@ -23,6 +23,7 @@
 
         "PLUNK_SECRET_KEY",
         "RESEND_API_KEY",
+        "RESEND_SEGMENT_ID",
 
         "STORAGE_REGION",
         "STORAGE_BUCKET_NAME",
