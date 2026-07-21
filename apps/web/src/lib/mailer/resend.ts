@@ -5,6 +5,7 @@ import { Resend } from "resend";
 import { isDevelopment } from "@/utils/environment/env";
 
 import {
+  AddContactToSegmentOptions,
   Contact,
   CreateContactOptions,
   EmailError,
@@ -162,6 +163,28 @@ export class ResendMailer implements Mailer {
       }
 
       return contact;
+    },
+
+    addToSegment: async (options: AddContactToSegmentOptions): Promise<void> => {
+      if (!options.id && !options.email) {
+        throw new EmailError(
+          "Either id or email must be provided",
+          "MISSING_IDENTIFIER"
+        );
+      }
+
+      const identifier = options.id
+        ? ({ contactId: options.id } as const)
+        : ({ email: options.email! } as const);
+
+      const { error } = await this.client.contacts.segments.add({
+        ...identifier,
+        segmentId: options.segmentId,
+      });
+
+      if (error) {
+        throw new EmailError(error.message, error.name);
+      }
     },
   };
 }

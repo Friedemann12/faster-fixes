@@ -6,6 +6,7 @@ export const mailer = createMailer();
 
 // Re-export types for convenience
 export type {
+  AddContactToSegmentOptions,
   Contact,
   CreateContactOptions,
   EmailAttachment,

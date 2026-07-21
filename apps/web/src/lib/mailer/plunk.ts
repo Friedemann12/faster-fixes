@@ -338,5 +338,15 @@ export class PlunkMailer implements Mailer {
         throw new EmailError(message);
       }
     },
+
+    // Plunk has no segment equivalent: contacts are targeted through triggers
+    // and campaigns instead. Fail loudly rather than silently dropping the call
+    // if the mailer provider is ever switched back to Plunk.
+    addToSegment: async (): Promise<void> => {
+      throw new EmailError(
+        "Plunk does not support segments",
+        "UNSUPPORTED_OPERATION"
+      );
+    },
   };
 }
