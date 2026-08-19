@@ -52,3 +52,5 @@ _internal/
 packages/skills/*-workspace/
 # Added by code-review-graph
 .code-review-graph/
+
+.idea

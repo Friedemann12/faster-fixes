@@ -3,10 +3,9 @@ import { stripeApi } from "@/server/stripe";
 import { stripe } from "@better-auth/stripe";
 import { prisma } from "@workspace/db";
 
-if (process.env.NODE_ENV === "production" && !process.env.STRIPE_WEBHOOK_SIGNING_SECRET) {
-  throw new Error("STRIPE_WEBHOOK_SIGNING_SECRET is required in production");
-}
-
+// No module-level env guard: billing is cloud-only, and self-hosted instances
+// build and run without Stripe credentials. The webhook route rejects requests
+// when the signing secret is missing (see verify-stripe-signature.ts).
 export const stripePlugin = stripe({
   stripeClient: stripeApi,
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SIGNING_SECRET ?? "",

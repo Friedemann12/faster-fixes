@@ -1,0 +1,140 @@
+# Full FasterFixes stack for Coolify. Postgres is NOT included — attach a Coolify
+# Postgres resource and pass its connection string as DATABASE_URL.
+#
+# Required environment variables (set them in Coolify):
+#   WEB_IMAGE / MIGRATE_IMAGE  image refs built by the GitHub Actions workflow
+#   APP_URL                    public URL of the app, e.g. https://ff.example.com
+#   DATABASE_URL               connection string of the Coolify Postgres resource
+#   BETTER_AUTH_SECRET         openssl rand -base64 32
+#   MINIO_ROOT_USER            MinIO access key
+#   MINIO_ROOT_PASSWORD        MinIO secret key
+#   MINIO_PUBLIC_URL           public URL of the MinIO S3 API, e.g. https://s3.example.com
+#   MINIO_BUCKET_NAME          bucket name, e.g. fasterfixes
+#   INNGEST_EVENT_KEY          openssl rand -hex 32
+#   INNGEST_SIGNING_KEY        openssl rand -hex 32
+#   RESEND_API_KEY             (or PLUNK_SECRET_KEY) — required for sign-up mails
+
+services:
+  ff-minio:
+    image: "minio/minio:latest"
+    restart: unless-stopped
+    command: 'server /data --console-address ":9001"'
+    environment:
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
+      # Without this, presigned URLs are signed for the container hostname and 404 in the browser.
+      MINIO_SERVER_URL: "${MINIO_PUBLIC_URL}"
+      MINIO_API_CORS_ALLOW_ORIGIN: "${APP_URL}"
+    volumes:
+      - "ff_minio_data:/data"
+
+  ff-minio-init:
+    image: "minio/mc:latest"
+    restart: "no"
+    depends_on:
+      - ff-minio
+    entrypoint:
+      - /bin/sh
+      - "-ec"
+    # List form, not a plain string: Compose word-splits a string command, which
+    # would hand `sh -c` only the first token of the script.
+    command:
+      - |
+        until mc alias set local http://ff-minio:9000 "$${MINIO_ROOT_USER}" "$${MINIO_ROOT_PASSWORD}"; do
+          echo "Waiting for MinIO ..."
+          sleep 2
+        done
+        mc mb --ignore-existing "local/$${MINIO_BUCKET_NAME}"
+        mc anonymous set download "local/$${MINIO_BUCKET_NAME}"
+    environment:
+      MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
+      MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
+      MINIO_BUCKET_NAME: "${MINIO_BUCKET_NAME}"
+
+  ff-inngest:
+    image: "inngest/inngest:latest"
+    restart: unless-stopped
+    command:
+      - inngest
+      - start
+      - "--host"
+      - 0.0.0.0
+      - "--sdk-url"
+      - "${APP_URL}/api/inngest"
+      - "--poll-interval"
+      - "60"
+      - "--sqlite-dir"
+      - /data
+      - "--queue-workers"
+      - "5"
+    environment:
+      INNGEST_EVENT_KEY: "${INNGEST_EVENT_KEY}"
+      INNGEST_SIGNING_KEY: "${INNGEST_SIGNING_KEY}"
+      LOG_LEVEL: info
+    volumes:
+      - "ff_inngest_data:/data"
+
+  # One-shot: applies Prisma migrations, then exits. ff-web waits for it.
+  ff-migrate:
+    image: "${MIGRATE_IMAGE:-ghcr.io/friedemann12/faster-fixes-migrate:latest}"
+    pull_policy: always
+    restart: "no"
+    networks: [default, coolify]
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+
+  ff-web:
+    # Built by CI and pulled, not built here: `next build` needs more memory than
+    # a small host has to spare. NEXT_PUBLIC_* are baked in by that build.
+    image: "${WEB_IMAGE:-ghcr.io/friedemann12/faster-fixes-web:latest}"
+    pull_policy: always
+    restart: unless-stopped
+    networks: [default, coolify]
+    # expose, not ports: Coolify routes the domain through its proxy on the
+    # internal network. Publishing 3000 would also serve the app over plain HTTP.
+    expose:
+      - "3000"
+    environment:
+      DATABASE_URL: "${DATABASE_URL}"
+      BASE_URL: "${APP_URL}"
+      DOMAIN_NAME: "${DOMAIN_NAME}"
+      BETTER_AUTH_URL: "${APP_URL}"
+      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET}"
+
+      # Server talks to MinIO in-network; browsers use the public URL.
+      STORAGE_ENDPOINT: "http://ff-minio:9000"
+      STORAGE_REGION: "${STORAGE_REGION:-us-east-1}"
+      STORAGE_BUCKET_NAME: "${MINIO_BUCKET_NAME}"
+      STORAGE_ACCESS_KEY_ID: "${MINIO_ROOT_USER}"
+      STORAGE_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
+      STORAGE_PUBLIC_URL: "${MINIO_PUBLIC_URL}/${MINIO_BUCKET_NAME}"
+
+      FF_API_ORIGIN: "${APP_URL}"
+      FF_API_KEY: "${FF_API_KEY:-}"
+
+      INNGEST_BASE_URL: "http://ff-inngest:8288"
+      INNGEST_EVENT_KEY: "${INNGEST_EVENT_KEY}"
+      INNGEST_SIGNING_KEY: "${INNGEST_SIGNING_KEY}"
+
+      RESEND_API_KEY: "${RESEND_API_KEY:-}"
+      RESEND_SEGMENT_ID: "${RESEND_SEGMENT_ID:-}"
+      PLUNK_SECRET_KEY: "${PLUNK_SECRET_KEY:-}"
+
+      GITHUB_APP_ID: "${GITHUB_APP_ID:-}"
+      GITHUB_PRIVATE_KEY: "${GITHUB_PRIVATE_KEY:-}"
+      GITHUB_WEBHOOK_SECRET: "${GITHUB_WEBHOOK_SECRET:-}"
+    depends_on:
+      ff-migrate:
+        condition: service_completed_successfully
+      ff-minio-init:
+        condition: service_completed_successfully
+
+networks:
+  # Coolify's internal bridge, where its Postgres resource lives. `external` means
+  # "already exists, do not create it" — it is host-local, nothing is exposed.
+  coolify:
+    external: true
+
+volumes:
+  ff_minio_data: null
+  ff_inngest_data: null

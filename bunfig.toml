@@ -1,0 +1,5 @@
+[install]
+# Isolated (pnpm-like) layout: dependencies stay under the package that declares
+# them, so TypeScript can name inferred types (better-auth, zod) portably.
+# A hoisted tree lifts them to the repo root and triggers TS2742 in apps/web.
+linker = "isolated"

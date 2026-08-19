@@ -27,6 +27,8 @@ export const config = [
     },
   },
   {
-    ignores: ["dist/**"],
+    // Build output, not source: .next/.source/generated are produced by
+    // `next build`, fumadocs-mdx and `prisma generate`.
+    ignores: ["dist/**", ".next/**", ".source/**", "generated/**"],
   },
 ]

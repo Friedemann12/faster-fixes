@@ -1,4 +1,4 @@
-import { s3Client } from "@/server/storage";
+import { getS3Client } from "@/server/storage";
 import { deleteObject } from "@better-upload/server/helpers";
 import { prisma } from "@workspace/db";
 
@@ -15,7 +15,7 @@ export async function deleteAsset(assetId: string) {
   if (!asset) return;
 
   try {
-    await deleteObject(s3Client, {
+    await deleteObject(getS3Client(), {
       bucket: asset.bucket,
       key: asset.key,
     });

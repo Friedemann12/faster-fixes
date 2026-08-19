@@ -63,6 +63,13 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} ${fontMono.variable} flex min-h-screen flex-col font-sans antialiased`}
       >
+        {/* Runtime config for client components: keeps the deployment's domains
+            out of the build output, so one image serves any instance. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__STORAGE_PUBLIC_URL__=${JSON.stringify(process.env.STORAGE_PUBLIC_URL ?? "")}`,
+          }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -76,8 +83,8 @@ export default function RootLayout({
                 <StopImpersonateButton />
 
                 <FeedbackProvider
-                  projectId={process.env.NEXT_PUBLIC_FF_API_KEY ?? ""}
-                  apiOrigin={process.env.NEXT_PUBLIC_FF_API_ORIGIN}
+                  projectId={process.env.FF_API_KEY ?? ""}
+                  apiOrigin={process.env.FF_API_ORIGIN}
                   classNames={{
                     button:
                       "bg-primary text-primary-foreground hover:bg-primary/90",

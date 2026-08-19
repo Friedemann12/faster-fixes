@@ -1,6 +1,6 @@
 "use server";
 
-import { s3Client } from "@/server/storage";
+import { getS3Client } from "@/server/storage";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { deleteObject } from "@better-upload/server/helpers";
 import { inferProcedureOutput } from "@trpc/server";
@@ -16,7 +16,7 @@ export const updateAvatar = protectedProcedure.mutation(async ({ ctx }) => {
 
   if (user.image && !user.image.startsWith("http")) {
     try {
-      await deleteObject(s3Client, {
+      await deleteObject(getS3Client(), {
         bucket: process.env.STORAGE_BUCKET_NAME!,
         key: user.image,
       });

@@ -2,12 +2,13 @@
   "name": "faster-fixes",
   "version": "0.0.1",
   "private": true,
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "lint:agent-rules": "turbo run lint:agent-rules --filter=web",
-    "typecheck": "turbo run typecheck",
+    "lint": "bun run --filter '*' lint",
+    "lint:agent-rules": "bun run --filter web lint:agent-rules",
+    "typecheck": "bun run --filter '*' typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
@@ -17,16 +18,14 @@
     "turbo": "^2.6.3",
     "typescript": "5.7.3"
   },
-  "packageManager": "pnpm@10.4.1",
+  "packageManager": "bun@1.3.2",
   "engines": {
-    "node": ">=20"
+    "bun": ">=1.3"
   },
-  "pnpm": {
-    "overrides": {
-      "react": "19.2.4",
-      "react-dom": "19.2.4",
-      "@types/react": "19.2.9",
-      "@types/react-dom": "19.2.3"
-    }
+  "overrides": {
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "@types/react": "19.2.9",
+    "@types/react-dom": "19.2.3"
   }
 }

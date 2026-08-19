@@ -1,9 +1,15 @@
+import path from "node:path";
 import { createMDX } from "fumadocs-mdx/next";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@workspace/ui"],
   typedRoutes: true,
+
+  // Self-contained server bundle for the Docker image; traced from the monorepo root
+  // so workspace packages (@workspace/db, @workspace/ui) are included.
+  output: "standalone",
+  outputFileTracingRoot: path.join(import.meta.dirname, "../.."),
 
   experimental: {
     authInterrupts: true,
@@ -32,36 +38,17 @@ const nextConfig = {
   },
 
   images: {
-    // Optimize image formats for better performance
     formats: ["image/avif", "image/webp"],
-    // Configure quality levels for different use cases
     qualities: [25, 50, 75, 90],
-    // Responsive device sizes for srcset generation
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    // Additional image sizes for smaller images
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Longer cache TTL for production performance
-    minimumCacheTTL: 31536000, // 1 year
+    minimumCacheTTL: 31536000,
+
     remotePatterns: [
-      // Google profile pictures
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
       },
-
-      // S3 buckets
-      {
-        protocol: "https",
-        hostname: "readyjs-dev.s3.eu-west-3.amazonaws.com",
-      },
-
-      // R2 bucket
-      {
-        protocol: "https",
-        hostname: "pub-c5726c6e6e084e2eb959739e0af1646a.r2.dev",
-      },
-
-      // for testing
       {
         protocol: "https",
         hostname: "loremflickr.com",
@@ -74,6 +61,9 @@ const nextConfig = {
         protocol: "https",
         hostname: "cdn.jsdelivr.net",
       },
+
+      // No entry for the storage host: asset URLs are resolved at runtime and
+      // rendered with plain <img>, never through next/image.
     ],
   },
 };

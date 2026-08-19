@@ -13,10 +13,10 @@
     "lint:agent-rules": "ESLINT_AGENT_RULES=1 eslint --max-warnings 0 .",
     "typecheck": "tsc --noEmit",
     "stripe:listen": "stripe listen --forward-to localhost:3000/api/auth/stripe/webhook",
-    "inngest": "pnpm dlx inngest-cli@latest dev"
+    "inngest": "bunx inngest-cli@latest dev"
   },
   "dependencies": {
-    "@better-auth/stripe": "^1.5.4",
+    "@better-auth/stripe": "~1.5.4",
     "@better-upload/client": "^3.0.14",
     "@better-upload/server": "^3.0.14",
     "@c15t/nextjs": "^1.8.3",
@@ -39,7 +39,7 @@
     "@vercel/blob": "^2.3.1",
     "@workspace/db": "workspace:*",
     "@workspace/ui": "workspace:*",
-    "better-auth": "^1.5.4",
+    "better-auth": "~1.5.4",
     "class-variance-authority": "^0.7.1",
     "date-fns": "^4.1.0",
     "facehash": "^0.1.0",
@@ -63,7 +63,7 @@
     "schema-dts": "^1.1.5",
     "slugify": "^1.6.6",
     "sonner": "^2.0.7",
-    "stripe": "^20.2.0",
+    "stripe": "20.2.0",
     "superjson": "^2.2.6",
     "xlsx": "^0.18.5",
     "zod": "^4.3.5"
@@ -86,10 +86,8 @@
     "remark-gfm": "^4.0.1",
     "typescript": "^5.9.3"
   },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.2.14",
-      "@types/react-dom": "19.2.3"
-    }
+  "overrides": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
   }
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { s3Client } from "@/server/storage";
+import { getS3Client } from "@/server/storage";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { deleteObject } from "@better-upload/server/helpers";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
@@ -39,7 +39,7 @@ export const updateOrganizationLogo = protectedProcedure
 
     if (org.logo) {
       try {
-        await deleteObject(s3Client, {
+        await deleteObject(getS3Client(), {
           bucket: process.env.STORAGE_BUCKET_NAME!,
           key: org.logo,
         });

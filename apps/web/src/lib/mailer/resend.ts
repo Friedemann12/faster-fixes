@@ -18,10 +18,14 @@ import {
 const DEV_TEST_EMAIL = "delivered@resend.dev";
 
 export class ResendMailer implements Mailer {
-  private client: Resend;
+  #client?: Resend;
 
-  constructor(apiKey: string) {
-    this.client = new Resend(apiKey);
+  constructor(private readonly apiKey: string) {}
+
+  // Built on first use, not in the constructor: the mailer singleton is created
+  // at module load, and a missing API key must not break `next build`.
+  private get client(): Resend {
+    return (this.#client ??= new Resend(this.apiKey));
   }
 
   public emails = {

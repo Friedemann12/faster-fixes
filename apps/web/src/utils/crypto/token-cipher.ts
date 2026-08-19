@@ -13,9 +13,13 @@ export type TokenCipher = {
 // each Tracker integration (Linear, Jira, …) gets encrypt/decrypt bound to its
 // own key without re-loading or re-validating the key itself. See ADR 0003.
 export function createTokenCipher(envVarName: string): TokenCipher {
-  const key = loadHexKeyFromEnv(envVarName);
+  // Loaded on first use, not at module load: integrations are optional and an
+  // unset key must not break `next build` when a route imports this module.
+  let key: Buffer | undefined;
+  const getKey = () => (key ??= loadHexKeyFromEnv(envVarName));
+
   return {
-    encrypt: (plain) => encryptWithKey(plain, key),
-    decrypt: (payload) => decryptWithKey(payload, key),
+    encrypt: (plain) => encryptWithKey(plain, getKey()),
+    decrypt: (payload) => decryptWithKey(payload, getKey()),
   };
 }

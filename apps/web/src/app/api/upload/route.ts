@@ -1,12 +1,15 @@
 import { auth } from "@/server/auth";
-import { s3Client } from "@/server/storage";
+import { getS3Client } from "@/server/storage";
 import { RejectUpload, route, type Router } from "@better-upload/server";
 import { toRouteHandler } from "@better-upload/server/adapters/next";
 import { prisma } from "@workspace/db";
 import { z } from "zod";
 
 const router: Router = {
-  client: s3Client,
+  // Getter, not a value: the router is built at import time but env is only present at runtime.
+  get client() {
+    return getS3Client();
+  },
   bucketName: process.env.STORAGE_BUCKET_NAME!,
   routes: {
     "organization-logo": route({

@@ -11,28 +11,59 @@ The widget packages (`@fasterfixes/core`, `@fasterfixes/react`) are MIT-licensed
 
 You will need:
 
-- A **Node.js host** — Vercel is recommended (the repo is a Next.js app), but anything that runs Next.js will work (Railway, Fly, self-managed).
-- A **PostgreSQL database** — Neon, Supabase, Railway, or self-managed.
-- An **Inngest** account for background jobs (screenshot processing, GitHub sync, etc.). The free tier is enough to get started.
-- An **S3-compatible object store** for screenshots — Cloudflare R2 is the recommended default; AWS S3 works identically.
+- A **Docker host** — Coolify is the recommended default (the repo ships a `docker-compose.yaml` for it). Any Next.js host works too (Vercel, Railway, Fly).
+- **Bun 1.3+** if you build outside Docker — the repo uses Bun as package manager and runtime.
+- A **PostgreSQL database** — in Coolify, add a Postgres resource and pass its connection string as `DATABASE_URL`.
+- **Inngest** for background jobs (screenshot processing, GitHub sync, etc.) — the compose file runs a self-hosted Inngest server; Inngest Cloud works too.
+- An **S3-compatible object store** for screenshots — MinIO is the default and is bundled in the compose file. AWS S3, Cloudflare R2, or Backblaze B2 work with the same variables.
 - A **Resend** or **Plunk** account for transactional email — required to send sign-up confirmations and password resets.
 - (Optional) A **GitHub App** if you want the GitHub integration.
 
 Stripe is not needed for self-hosted installs. The billing code only runs on the hosted cloud version.
 
-## 1. Clone and deploy
+## 1. Deploy with Coolify
+
+The repo ships a `docker-compose.yaml` covering MinIO, a self-hosted Inngest server, a one-shot migration job, and the Next.js app. Postgres is deliberately not part of it — use a Coolify Postgres resource.
+
+1. Add a **Postgres** resource in Coolify and copy its internal connection string.
+2. Create a new resource → **Docker Compose**, point it at this repository, and select `docker-compose.yaml`.
+3. Set the environment variables in Coolify:
+
+```bash
+APP_URL="https://your-domain.com"
+DOMAIN_NAME="your-domain.com"
+DATABASE_URL="postgres://..."   # from the Coolify Postgres resource
+BETTER_AUTH_SECRET="<openssl rand -base64 32>"
+
+MINIO_ROOT_USER="<random>"
+MINIO_ROOT_PASSWORD="<random>"
+MINIO_BUCKET_NAME="fasterfixes"
+MINIO_PUBLIC_URL="https://s3.your-domain.com"   # public S3 API URL
+
+INNGEST_EVENT_KEY="<openssl rand -hex 32>"
+INNGEST_SIGNING_KEY="<openssl rand -hex 32>"
+
+RESEND_API_KEY="re_..."
+```
+
+4. Assign domains in Coolify: `your-domain.com` → `ff-web:3000`, `s3.your-domain.com` → `ff-minio:9000`. Add a console domain for `ff-minio:9001` if you want the MinIO UI.
+5. Deploy. `ff-migrate` applies Prisma migrations and `ff-minio-init` creates the bucket before `ff-web` starts.
+
+Migrations run on every deploy, so no separate migration step is needed.
+
+## 2. Alternative: deploy to a Node.js host
 
 Fork or clone [the repository](https://github.com/manucoffin/faster-fixes), then deploy the `apps/web` workspace to your host.
 
 ```bash
 git clone https://github.com/manucoffin/faster-fixes.git
 cd faster-fixes
-pnpm install
+bun install
 ```
 
 On Vercel, import the repo and set the root directory to `apps/web`. Vercel auto-detects Next.js and Turborepo.
 
-## 2. Configure environment variables
+## 3. Configure environment variables
 
 Copy `apps/web/.env.example` and fill in the values. The minimum set for a self-hosted deployment:
 
@@ -46,13 +77,13 @@ DATABASE_URL="postgresql://user:password@host:5432/db?schema=public"
 BETTER_AUTH_SECRET="<generate with: openssl rand -base64 32>"
 BETTER_AUTH_URL="https://your-domain.com"
 
-# Storage (Cloudflare R2)
-STORAGE_REGION="auto"
-STORAGE_BUCKET_NAME="your-bucket"
-NEXT_PUBLIC_STORAGE_BASE_URL="https://<account-id>.r2.cloudflarestorage.com/your-bucket"
-R2_ACCOUNT_ID="..."
-R2_ACCESS_KEY_ID="..."
-R2_SECRET_ACCESS_KEY="..."
+# Storage (MinIO or any S3-compatible store)
+STORAGE_ENDPOINT="http://ff-minio:9000"       # S3 API endpoint reachable from the server
+STORAGE_REGION="us-east-1"
+STORAGE_BUCKET_NAME="fasterfixes"
+STORAGE_ACCESS_KEY_ID="..."
+STORAGE_SECRET_ACCESS_KEY="..."
+STORAGE_PUBLIC_URL="https://s3.your-domain.com/fasterfixes"            # browser-facing
 
 # Inngest (required in production)
 INNGEST_EVENT_KEY="..."
@@ -64,7 +95,7 @@ RESEND_API_KEY="re_..."
 # PLUNK_SECRET_KEY="sk_..."
 
 # Widget API (points clients' widgets at your instance)
-NEXT_PUBLIC_FF_API_ORIGIN="https://your-domain.com"
+FF_API_ORIGIN="https://your-domain.com"
 
 # Self-hosted flag (keep false to skip marketing pages)
 NEXT_PUBLIC_IS_CLOUD="false"
@@ -72,33 +103,35 @@ NEXT_PUBLIC_IS_CLOUD="false"
 
 GitHub App variables are optional. Skip them unless you need the GitHub integration. Leave the Stripe variables unset — billing is cloud-only and self-hosted installs don't run it.
 
-If you prefer AWS S3 over Cloudflare R2, use `AWS_ACCESS_KEY_ID`, `AWS_BUCKET_NAME`, and `AWS_SECRET_ACCESS_KEY` instead of the R2 variables.
+Every URL and key above is read at runtime, so the same image serves any instance — a domain change needs a restart, not a rebuild.
 
-## 3. Provision external services
+## 4. Provision external services
 
 ### PostgreSQL
 
 Any Postgres 14+ works. Create a database and put the connection string in `DATABASE_URL`.
 
-### Cloudflare R2
+### MinIO
 
-Create a bucket and an API token scoped to that bucket. Copy the account ID, access key, and secret into the R2 variables above. Make the bucket public (or front it with a Worker) so screenshots are readable by reviewers.
+Create a bucket and an access key scoped to it. Set the bucket's anonymous policy to `download` so screenshots are readable by reviewers, or keep it private and serve assets through signed URLs.
+
+Two URLs matter and they are usually different: `STORAGE_ENDPOINT` is what the server calls (inside the Docker network, `http://ff-minio:9000`), while `STORAGE_PUBLIC_URL` is what browsers load. Set MinIO's `MINIO_SERVER_URL` to the public S3 API URL, otherwise presigned URLs point at the internal hostname.
 
 ### Inngest
 
 Create an app at [inngest.com](https://www.inngest.com). Copy the event key and signing key. After your first deployment, connect Inngest to your instance at `https://your-domain.com/api/inngest`.
 
-## 4. Run migrations
+## 5. Run migrations
 
-From the repo root:
+Skip this if you deployed with Coolify — the `ff-migrate` service handles it. Otherwise, from the repo root:
 
 ```bash
-pnpm --filter @workspace/db migrate:dev
+bun run --filter @workspace/db migrate:dev
 ```
 
 This applies all Prisma migrations and generates the client. For subsequent deploys, your host's build step should run `prisma generate`; Prisma migrations are committed to the repo and applied via `migrate:dev` in development and `migrate:deploy` in production (run this as part of your deploy pipeline).
 
-## 5. Verify
+## 6. Verify
 
 After the first deploy:
 
@@ -106,4 +139,4 @@ After the first deploy:
 2. Create a project, copy the widget API key, and test the widget in any page.
 3. Check Inngest's dashboard to confirm events are being received.
 
-Your instance is now ready. Point your clients' widgets at `NEXT_PUBLIC_FF_API_ORIGIN` and connect your AI coding agent via the [MCP server](/docs/mcp/setup).
+Your instance is now ready. Point your clients' widgets at `FF_API_ORIGIN` and connect your AI coding agent via the [MCP server](/docs/mcp/setup).

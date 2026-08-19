@@ -9,9 +9,8 @@
 | **DB schema**   | `packages/database/schema/asset.prisma` | `Asset` model — single source of truth for files |
 | **URL builder** | `server/storage/build-asset-url.ts`     | `buildAssetUrl()` — derives public URL from key  |
 | **DB helper**   | `server/storage/create-asset.ts`        | `createAsset()` — creates an Asset row           |
-| **S3 client**   | `server/storage/index.ts`               | `better-upload` S3 client for presigned URLs     |
+| **S3 client**   | `server/storage/index.ts`               | `getS3Client()` — MinIO/S3 client, lazy + memoized |
 | **Upload API**  | `app/api/upload/route.ts`               | Presigned URL routes per upload context          |
-| **Legacy**      | `lib/s3-client.ts`                      | Old `getS3FileUrl()` — prefer `buildAssetUrl()`  |
 
 All `server/` and `app/` paths relative to `apps/web/src/`.
 
@@ -41,10 +40,10 @@ Asset row (key + provider + bucket)
   buildAssetUrl(asset)
         │
         ▼
-  "https://{bucket}.s3.{region}.amazonaws.com/{key}"
+  "{STORAGE_PUBLIC_URL}/{key}"
 ```
 
-No URL is stored in the database. The public URL is always derived from the asset's `key`, `provider`, and `bucket` fields plus the `AWS_REGION` env var.
+No URL is stored in the database. The public URL is always derived from the asset's `key` plus `STORAGE_PUBLIC_URL` — the browser-facing base URL of the bucket, which differs from `STORAGE_ENDPOINT` (the server-side S3 API endpoint).
 
 ## Asset Model
 
@@ -114,8 +113,8 @@ import { buildAssetUrl } from "@/server/storage/build-asset-url";
 // Inside a mutation:
 const asset = await createAsset({
   key: `profile-image/${ctx.user.id}/${crypto.randomUUID()}.jpg`,
-  bucket: process.env.AWS_BUCKET_NAME!,
-  provider: "s3",
+  bucket: process.env.STORAGE_BUCKET_NAME!,
+  provider: "minio",
   filename: "photo.jpg",
   mimeType: "image/jpeg",
   size: 204800,
@@ -154,16 +153,9 @@ const imageUrl = profile.imageAsset
   : profile.image; // legacy fallback
 ```
 
-### Adding a new storage provider
+### Switching storage provider
 
-1. Add a new `case` in `build-asset-url.ts`:
-
-```typescript
-case "r2":
-  return `${process.env.R2_PUBLIC_URL}/${asset.key}`;
-```
-
-2. Add the env var to `.env.example`.
+Any S3-compatible store works — MinIO, AWS S3, Cloudflare R2, Backblaze B2. Point `STORAGE_ENDPOINT` at its S3 API and `STORAGE_PUBLIC_URL` at the public bucket URL. The `provider` column stays for auditing which store an object was written to; it no longer drives URL construction.
 
 ## Migration Strategy
 
