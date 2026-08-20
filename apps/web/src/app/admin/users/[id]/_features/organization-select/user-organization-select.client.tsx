@@ -35,7 +35,7 @@ export function UserOrganizationSelect({
   return matchQueryStatus(organizationsQuery, {
     Loading: <Skeleton className="h-10 w-full rounded-md" />,
     Errored: (error) => (
-      <div className="text-sm text-red-500">
+      <div className="text-sm text-destructive">
         Failed to load organizations: {String(error)}
       </div>
     ),
@@ -50,7 +50,7 @@ export function UserOrganizationSelect({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
-          {organizationsQuery.data?.map((org: any) => (
+          {organizationsQuery.data?.map((org) => (
             <SelectItem key={org.id} value={org.id}>
               {org.name}
             </SelectItem>

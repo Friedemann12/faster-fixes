@@ -8,20 +8,16 @@ model Organization {
   logo             String?
   metadata         String?
   isDefault        Boolean @default(false)
-  stripeCustomerId String?
 
   members     Member[]
   invitations Invitation[]
 
-  subscription Subscription?
 
   projects    Project[]
   agentTokens AgentToken[]
 
   gitHubInstallations GitHubInstallation[]
   linearInstallation  LinearInstallation?
-  jiraInstallation    JiraInstallation?
-  slackInstallation   SlackInstallation?
 
   @@unique([slug])
   @@map("organization")
@@ -41,8 +37,6 @@ model Member {
   assignedFeedback             Feedback[]
   gitHubInstallations          GitHubInstallation[]
   linearInstallationsInstalled LinearInstallation[]
-  jiraInstallationsInstalled   JiraInstallation[]
-  slackInstallations           SlackInstallation[]
 
   @@index([organizationId])
   @@index([userId])

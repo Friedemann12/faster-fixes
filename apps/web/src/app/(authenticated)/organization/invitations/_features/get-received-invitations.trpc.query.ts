@@ -9,8 +9,11 @@ export const getReceivedInvitations = protectedProcedure.query(
 
     const invitations = await prisma.invitation.findMany({
       where: {
-        email: session.user.email,
+        // Better Auth lowercases invitation emails on create, so a mixed-case
+        // sign-up address would otherwise never match its own invitation.
+        email: session.user.email.toLowerCase(),
         status: "pending",
+        expiresAt: { gt: new Date() },
       },
       include: {
         organization: {

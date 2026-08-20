@@ -1,7 +1,3 @@
-import {
-  checkResourceLimit,
-  resolveOrganizationPlan,
-} from "@/server/auth/subscription";
 import { prisma } from "@workspace/db";
 import { Prisma } from "@workspace/db/generated/prisma/client";
 import { NextRequest, NextResponse } from "next/server";
@@ -51,31 +47,6 @@ export async function createFeedbacks(req: NextRequest) {
     return agentError("Project not found", "NOT_FOUND", 404);
   }
 
-  // Reject the whole batch upfront if it would cross the plan limit, so the
-  // caller can split or upgrade rather than landing in a half-imported state.
-  const plan = await resolveOrganizationPlan(
-    agentToken.organization.id,
-    prisma,
-  );
-  const limit = plan.limits.feedbacks as number;
-  if (limit !== Infinity) {
-    const currentCount = await prisma.feedback.count({
-      where: { project: { organizationId: agentToken.organization.id } },
-    });
-    if (currentCount + feedbacks.length > limit) {
-      return NextResponse.json(
-        {
-          error: "Feedback limit would be exceeded by this batch.",
-          code: "RESOURCE_LIMIT_EXCEEDED",
-          current: currentCount,
-          limit,
-          requested: feedbacks.length,
-        },
-        { status: 403 },
-      );
-    }
-  }
-
   const reviewer = await getOrCreateImportReviewer(
     projectId,
     reviewer_name ?? DEFAULT_IMPORT_REVIEWER_NAME,
@@ -118,14 +89,6 @@ export async function createFeedbacks(req: NextRequest) {
     }),
   );
 
-  // Tell the caller whether they're now at the cap so they know to pause
-  // before queuing another batch.
-  const postCheck = await checkResourceLimit(
-    agentToken.organization.id,
-    "feedbacks",
-    prisma,
-  );
-
   console.info(
     `[agent-api] feedbacks:create tokenId=${agentToken.id} project=${projectId} count=${created.length} source=${source ?? "n/a"} reviewer=${reviewer.id}`,
   );
@@ -135,7 +98,6 @@ export async function createFeedbacks(req: NextRequest) {
       created: created.length,
       feedbacks: created,
       reviewer: { id: reviewer.id, name: reviewer.name },
-      atLimit: !postCheck.allowed,
     },
     { status: 201 },
   );

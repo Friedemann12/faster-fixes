@@ -1,7 +1,7 @@
 "use server";
 
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { UpdateFeedbackAssigneeSchema } from "./update-feedback-assignee.schema";
 
 export const updateFeedbackAssignee = protectedProcedure
@@ -49,3 +49,5 @@ export const updateFeedbackAssignee = protectedProcedure
 
     return { id: input.feedbackId };
   });
+
+export type UpdateFeedbackAssigneeOutput = inferProcedureOutput<typeof updateFeedbackAssignee>;

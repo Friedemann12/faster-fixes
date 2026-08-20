@@ -2,7 +2,7 @@
 
 import { deleteAsset } from "@/server/storage/delete-asset";
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { HardDeleteFeedbackSchema } from "./hard-delete-feedback.schema";
 
 export const hardDeleteFeedback = protectedProcedure
@@ -47,3 +47,5 @@ export const hardDeleteFeedback = protectedProcedure
 
     return { id: input.feedbackId };
   });
+
+export type HardDeleteFeedbackOutput = inferProcedureOutput<typeof hardDeleteFeedback>;

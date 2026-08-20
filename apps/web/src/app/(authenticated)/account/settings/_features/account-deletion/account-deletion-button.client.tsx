@@ -60,7 +60,7 @@ export function AccountDeletionButton() {
       await signOut({
         fetchOptions: {
           onSuccess: () => {
-            router.push("/");
+            router.push("/login");
           },
         },
       });

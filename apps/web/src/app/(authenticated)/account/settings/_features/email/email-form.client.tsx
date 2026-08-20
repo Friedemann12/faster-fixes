@@ -123,7 +123,7 @@ export function EmailForm() {
                   />
                   {getCurrentEmailQuery.data?.emailVerified && (
                     <InputGroupAddon align="inline-end">
-                      <CheckIcon className="text-green-600 dark:text-green-400" />
+                      <CheckIcon className="text-success" />
                     </InputGroupAddon>
                   )}
                 </InputGroup>

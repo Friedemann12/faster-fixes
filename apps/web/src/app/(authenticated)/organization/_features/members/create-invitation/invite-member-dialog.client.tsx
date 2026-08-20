@@ -21,9 +21,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@workspace/ui/components/form";
+import { CopyableText } from "@workspace/ui/components/copyable-text";
 import { Input } from "@workspace/ui/components/input";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import z from "zod";
 
 const InviteMemberFormSchema = z.object({
@@ -50,21 +51,25 @@ export function InviteMemberDialog({
     defaultValues: { email: "" },
   });
 
+  const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+
   const handleOpenChange = (newOpen: boolean) => {
     onOpenChange(newOpen);
     if (!newOpen) {
       form.reset();
+      setInviteUrl(null);
     }
   };
 
   const createInvitation = useMutation(
     trpc.authenticated.organization.invitation.create.mutationOptions({
-      onSuccess: async () => {
+      onSuccess: async (invitation) => {
         await queryClient.invalidateQueries(
           trpc.authenticated.organization.invitation.get.queryFilter(),
         );
-        toast.success("Invitation sent successfully");
-        handleOpenChange(false);
+        // The dialog stays open: nothing was sent, and the operator still needs
+        // to copy the link before closing it.
+        setInviteUrl(invitation.inviteUrl);
       },
       onError: (error) => {
         form.setError("root", {
@@ -90,55 +95,75 @@ export function InviteMemberDialog({
         <DialogHeader>
           <DialogTitle>Invite a member</DialogTitle>
           <DialogDescription>
-            Send an email invitation to add a new member to your organization.
+            Create an invitation link and send it to the person yourself. This
+            instance does not send email.
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
-          >
-            {form.formState.errors.root && (
-              <p className="text-destructive text-sm">
-                {form.formState.errors.root.message}
-              </p>
-            )}
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email address</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder="email@example.com"
-                      disabled={createInvitation.isPending}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+        {inviteUrl && (
+          <div className="space-y-3">
+            <p className="text-muted-foreground text-sm">
+              Invitation created. Share this link — it expires in 14 days and
+              only works for the invited address.
+            </p>
+            <CopyableText className="bg-muted rounded-md border px-3 py-2 text-sm">
+              {inviteUrl}
+            </CopyableText>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-                disabled={createInvitation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createInvitation.isPending}>
-                {createInvitation.isPending ? "Sending..." : "Send invitation"}
+              <Button type="button" onClick={() => handleOpenChange(false)}>
+                Done
               </Button>
             </DialogFooter>
-          </form>
-        </Form>
+          </div>
+        )}
+
+        {!inviteUrl && (
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="flex flex-col gap-4"
+            >
+              {form.formState.errors.root && (
+                <p className="text-destructive text-sm">
+                  {form.formState.errors.root.message}
+                </p>
+              )}
+
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email address</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="email@example.com"
+                        disabled={createInvitation.isPending}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleOpenChange(false)}
+                  disabled={createInvitation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createInvitation.isPending}>
+                  {createInvitation.isPending ? "Creating..." : "Create link"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -17,10 +17,11 @@ export function getQueryClient() {
 }
 
 export function getUrl() {
-  const base = (() => {
-    if (typeof window !== "undefined") return "";
-    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-    return "http://localhost:3000";
-  })();
+  // Relative in the browser; on the server the app calls itself, so BASE_URL is
+  // what the container can actually reach.
+  const base =
+    typeof window !== "undefined"
+      ? ""
+      : process.env.BASE_URL || "http://localhost:3000";
   return `${base}/api/trpc`;
 }

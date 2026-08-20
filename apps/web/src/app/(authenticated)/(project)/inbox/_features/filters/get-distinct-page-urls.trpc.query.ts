@@ -1,7 +1,7 @@
 "use server";
 
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import z from "zod";
 
 export const getDistinctPageUrls = protectedProcedure
@@ -37,3 +37,5 @@ export const getDistinctPageUrls = protectedProcedure
 
     return results.map((r) => r.pageUrl);
   });
+
+export type GetDistinctPageUrlsOutput = inferProcedureOutput<typeof getDistinctPageUrls>;

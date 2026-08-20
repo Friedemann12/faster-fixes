@@ -31,10 +31,7 @@ RUN bun run --filter @fasterfixes/core build \
  && bun run --filter @workspace/db db:gen
 
 # No deployment-specific build args: every URL, key and secret is read at runtime,
-# so this image carries nothing about the instance it will run on. NEXT_PUBLIC_IS_CLOUD
-# is the one exception — it only toggles the marketing pages and is false everywhere
-# but the hosted version.
-ARG NEXT_PUBLIC_IS_CLOUD=false
+# so this image carries nothing about the instance it will run on.
 ARG DATABASE_URL="postgresql://build:build@localhost:5432/build"
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN bun run --filter web build

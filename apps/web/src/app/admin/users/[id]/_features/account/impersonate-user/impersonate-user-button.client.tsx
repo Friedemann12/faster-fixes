@@ -31,23 +31,22 @@ export const ImpersonateUserButton = ({
   const router = useRouter();
   const { refetch: refetchSession } = useSession();
 
-  const impersonateUserMutation =
-    useMutation(trpc.admin.users.impersonate.mutationOptions({
+  const impersonateUserMutation = useMutation(
+    trpc.admin.users.impersonate.mutationOptions({
       onSuccess: async () => {
         toast.success("Success", {
           description: `You are now signed in as ${userEmail}`,
         });
         await refetchSession();
-        router.push("/");
+        router.push("/inbox");
       },
       onError: (error) => {
         toast.error("Error", {
-          description:
-            error.message ||
-            "Failed to impersonate this user",
+          description: error.message || "Failed to impersonate this user",
         });
       },
-    }));
+    }),
+  );
 
   const handleImpersonate = () => {
     impersonateUserMutation.mutate({ userId });

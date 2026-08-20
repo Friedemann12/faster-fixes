@@ -1,5 +1,4 @@
 import { auth } from "@/server/auth";
-import { stripeClient } from "@better-auth/stripe/client";
 import {
   adminClient,
   customSessionClient,
@@ -18,7 +17,6 @@ export const {
   updateUser,
   useListOrganizations,
   useActiveOrganization,
-  subscription,
   useActiveMember,
   useActiveMemberRole,
   organization,
@@ -32,8 +30,5 @@ export const {
     adminClient(),
     organizationClient(),
     lastLoginMethodClient(),
-    stripeClient({
-      subscription: true, // Enables subscription management
-    }),
   ],
 });

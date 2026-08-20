@@ -17,17 +17,13 @@ export function UsersOverviewCard() {
     Success: ({ data }) => {
       const growth = data?.monthOverMonthGrowth ?? null;
       const formattedGrowth =
-        growth == null
-          ? null
-          : `${growth > 0 ? "+" : ""}${growth.toFixed(1)}%`;
+        growth == null ? null : `${growth > 0 ? "+" : ""}${growth.toFixed(1)}%`;
 
       return (
         <Card>
           <CardContent>
             <div className="text-2xl font-bold">{data?.totalCount}</div>
-            <p className="text-muted-foreground mb-4 text-xs">
-              Total users
-            </p>
+            <p className="text-muted-foreground mb-4 text-xs">Total users</p>
 
             {/* New users this month section */}
             <div className="space-y-3 border-t pt-4">
@@ -47,7 +43,7 @@ export function UsersOverviewCard() {
                   className={cn(
                     "text-xs font-medium",
                     growth == null && "text-muted-foreground",
-                    growth != null && growth > 0 && "text-emerald-600",
+                    growth != null && growth > 0 && "text-success",
                     growth != null && growth < 0 && "text-destructive",
                     growth === 0 && "text-muted-foreground",
                   )}
@@ -70,14 +66,14 @@ function UsersOverviewCardLoading() {
         <div className="mb-1">
           <Skeleton className="h-8 w-24" />
         </div>
-        <p className="text-muted-foreground mb-4 text-xs">
-          Total users
-        </p>
+        <p className="text-muted-foreground mb-4 text-xs">Total users</p>
 
         {/* New users section skeleton */}
         <div className="space-y-3 border-t pt-4">
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-xs">New this month</span>
+            <span className="text-muted-foreground text-xs">
+              New this month
+            </span>
             <Skeleton className="h-5 w-8" />
           </div>
           <div className="flex items-center justify-between">
@@ -94,9 +90,7 @@ function UsersOverviewCardError() {
   return (
     <Card className="border-destructive/50">
       <CardContent className="pt-6">
-        <p className="text-destructive text-sm">
-          Failed to load statistics
-        </p>
+        <p className="text-destructive text-sm">Failed to load statistics</p>
       </CardContent>
     </Card>
   );

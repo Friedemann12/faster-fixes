@@ -40,10 +40,16 @@ Asset row (key + provider + bucket)
   buildAssetUrl(asset)
         │
         ▼
-  "{STORAGE_PUBLIC_URL}/{key}"
+  "/api/assets/{key}"
 ```
 
-No URL is stored in the database. The public URL is always derived from the asset's `key` plus `STORAGE_PUBLIC_URL` — the browser-facing base URL of the bucket, which differs from `STORAGE_ENDPOINT` (the server-side S3 API endpoint).
+No URL is stored in the database; it is always derived from the asset's `key`.
+
+Objects are served through the app's `/api/assets/[...key]` route, which streams
+them from the store over the internal network. The store therefore needs no
+public endpoint, no certificate and no CORS origin — only the web app is exposed.
+`STORAGE_ENDPOINT` is the server-side S3 API endpoint and the only address of the
+store the deployment needs.
 
 ## Asset Model
 
@@ -155,7 +161,7 @@ const imageUrl = profile.imageAsset
 
 ### Switching storage provider
 
-Any S3-compatible store works — MinIO, AWS S3, Cloudflare R2, Backblaze B2. Point `STORAGE_ENDPOINT` at its S3 API and `STORAGE_PUBLIC_URL` at the public bucket URL. The `provider` column stays for auditing which store an object was written to; it no longer drives URL construction.
+Any S3-compatible store works — MinIO, AWS S3, Cloudflare R2, Backblaze B2. Point `STORAGE_ENDPOINT` at its S3 API; the bucket may stay private. The `provider` column stays for auditing which store an object was written to; it no longer drives URL construction.
 
 ## Migration Strategy
 

@@ -1,5 +1,5 @@
 import { adminProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 export const toggleEmailVerified = adminProcedure
@@ -35,3 +35,5 @@ export const toggleEmailVerified = adminProcedure
 
     return updatedUser;
   });
+
+export type ToggleEmailVerifiedOutput = inferProcedureOutput<typeof toggleEmailVerified>;

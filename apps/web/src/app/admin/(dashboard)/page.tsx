@@ -1,8 +1,5 @@
 import { DashboardPageContent } from "@/app/_features/core/dashboard/dashboard-page-content";
-import { ActiveSubscriptionsCard } from "./_features/active-subscriptions-card/active-subscriptions-card.client";
 import { FeedbackOverviewCard } from "./_features/feedback-overview-card/feedback-overview-card.client";
-import { MrrCard } from "./_features/mrr-card/mrr-card.client";
-import { SubscriptionsChart } from "./_features/subscriptions-chart/subscriptions-chart.client";
 import { UsersOverviewCard } from "./_features/users-overview-card/users-overview-card.client";
 
 export default async function AdminDashboardPage() {
@@ -12,14 +9,10 @@ export default async function AdminDashboardPage() {
       breadcrumbs={[{ label: "Dashboard", link: "/admin" }]}
     >
       <div className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <UsersOverviewCard />
-          <ActiveSubscriptionsCard />
-          <MrrCard />
           <FeedbackOverviewCard />
         </div>
-
-        <SubscriptionsChart />
       </div>
     </DashboardPageContent>
   );

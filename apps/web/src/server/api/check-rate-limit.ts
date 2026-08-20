@@ -11,8 +11,8 @@ type RateLimitConfig = {
 const RATE_LIMITS = {
   submit: { max: 100, windowMs: 3_600_000 } satisfies RateLimitConfig,
   read: { max: 1000, windowMs: 3_600_000 } satisfies RateLimitConfig,
-  // Agent ceilings are plan-tiered (see AGENT_API_RATE_LIMITS); the `max` here
-  // is only a fallback and is overridden per request via `overrideMax`.
+  // Abuse backstop for the agent API (see ADR 0007). Fixed, not plan-tiered:
+  // this instance has no plans.
   "agent:read": { max: 1000, windowMs: 3_600_000 } satisfies RateLimitConfig,
   "agent:write": { max: 120, windowMs: 3_600_000 } satisfies RateLimitConfig,
   trpc: { max: 300, windowMs: 60_000 } satisfies RateLimitConfig,
@@ -54,9 +54,7 @@ export async function checkRateLimit(
   const windowStart = now - windowMs;
   const id = crypto.randomUUID();
 
-  const rows = await prisma.$queryRaw<
-    { count: number; lastRequest: bigint }[]
-  >`
+  const rows = await prisma.$queryRaw<{ count: number; lastRequest: bigint }[]>`
     INSERT INTO "rateLimit" ("id", "key", "count", "lastRequest")
     VALUES (${id}, ${key}, 1, ${BigInt(now)})
     ON CONFLICT ("key") DO UPDATE SET

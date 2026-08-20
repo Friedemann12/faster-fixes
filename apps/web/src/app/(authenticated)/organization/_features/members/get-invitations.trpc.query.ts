@@ -1,5 +1,6 @@
 "use server";
 
+import { buildInviteUrl } from "@/app/_features/organization/_utils/build-invite-url";
 import { protectedProcedure } from "@/server/trpc/trpc";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { GetInvitationsSchema } from "./get-invitations.schema";
@@ -33,7 +34,15 @@ export const getInvitations = protectedProcedure
       orderBy: { createdAt: "desc" },
     });
 
-    return invitations;
+    const now = new Date();
+
+    return invitations.map((invitation) => ({
+      ...invitation,
+      inviteUrl: buildInviteUrl(invitation.id),
+      // Expired rows keep status "pending", so without this the table would
+      // offer links that no longer work.
+      isExpired: invitation.expiresAt < now,
+    }));
   });
 
 export type GetInvitationsOutput = inferProcedureOutput<

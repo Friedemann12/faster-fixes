@@ -61,10 +61,6 @@ export function InboxTabs() {
     trpc.authenticated.projects.linear.getLink.queryOptions({ projectId }),
   );
 
-  const jiraLinkQuery = useQuery(
-    trpc.authenticated.projects.jira.getLink.queryOptions({ projectId }),
-  );
-
   const selectedFeedback = React.useMemo(
     () => feedbackQuery.data?.find((f) => f.id === selectedFeedbackId) ?? null,
     [feedbackQuery.data, selectedFeedbackId],
@@ -168,7 +164,6 @@ export function InboxTabs() {
         projectId={projectId}
         hasGitHubLink={!!gitHubLinkQuery.data}
         hasLinearLink={!!linearLinkQuery.data}
-        hasJiraLink={!!jiraLinkQuery.data}
       />
     </div>
   );

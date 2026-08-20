@@ -45,9 +45,7 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
 
   // Page URL
   const displayUrl = feedback.pageUrl.replace(/^https?:\/\//, "");
-  lines.push(
-    `**Page:** [${displayUrl}](${feedback.pageUrl})`,
-  );
+  lines.push(`**Page:** [${displayUrl}](${feedback.pageUrl})`);
 
   // Component path + selector
   const locationParts: string[] = [];
@@ -84,7 +82,9 @@ export function formatIssueBody(feedback: FeedbackForIssue): string {
   }
   if (feedback.os) envParts.push(feedback.os);
   if (feedback.viewportWidth && feedback.viewportHeight) {
-    envParts.push(`${feedback.viewportWidth} \u00d7 ${feedback.viewportHeight}`);
+    envParts.push(
+      `${feedback.viewportWidth} \u00d7 ${feedback.viewportHeight}`,
+    );
   }
 
   if (envParts.length > 0 || feedback.reviewerName) {

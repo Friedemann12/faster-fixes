@@ -1,18 +1,15 @@
-import { presignGetObject } from "@better-upload/server/helpers";
-import { getS3Client } from "@/server/storage";
-
 type AssetForSignedUrl = {
   key: string;
-  bucket: string;
 };
 
+/**
+ * Absolute URL of a stored asset, served through the app's asset route.
+ *
+ * Absolute rather than relative because these URLs are embedded in GitHub and
+ * Linear issues, which fetch them from outside the app.
+ */
 export async function getSignedAssetUrl(
   asset: AssetForSignedUrl,
-  expiresIn = 3600,
 ): Promise<string> {
-  return presignGetObject(getS3Client(), {
-    bucket: asset.bucket,
-    key: asset.key,
-    expiresIn,
-  });
+  return `${process.env.BASE_URL ?? ""}/api/assets/${asset.key}`;
 }

@@ -1,9 +1,3 @@
-import {
-  PLAN_LIMITS,
-  type PlanLimits,
-  SubscriptionPlanName,
-} from "@/server/auth/config/subscription-plans";
-import { resolveOrganizationPlan } from "@/server/auth/subscription";
 import { prisma } from "@workspace/db";
 import { customSession } from "better-auth/plugins";
 
@@ -35,18 +29,6 @@ export const customSessionPlugin = customSession(async ({ user, session }) => {
     },
   });
 
-  let activePlanName: string = SubscriptionPlanName.Free;
-  let activePlanLimits: PlanLimits = PLAN_LIMITS[SubscriptionPlanName.Free];
-
-  if (currentSessionRecord?.activeOrganizationId) {
-    const plan = await resolveOrganizationPlan(
-      currentSessionRecord.activeOrganizationId,
-      prisma,
-    );
-    activePlanName = plan.planName;
-    activePlanLimits = plan.limits;
-  }
-
   return {
     user: {
       ...user,
@@ -59,8 +41,6 @@ export const customSessionPlugin = customSession(async ({ user, session }) => {
       ...session,
       impersonatedBy: currentSessionRecord?.impersonatedBy,
       activeOrganizationId: currentSessionRecord?.activeOrganizationId ?? null,
-      activePlanName,
-      activePlanLimits,
     },
   };
 });

@@ -4,12 +4,7 @@ import type { FeedbackStatus } from "@/types/feedback-status";
 // (triage|backlog|unstarted|started|completed|canceled) is fixed by Linear's API.
 // Always map by type, never by name.
 export type LinearStateType =
-  | "triage"
-  | "backlog"
-  | "unstarted"
-  | "started"
-  | "completed"
-  | "canceled";
+  "triage" | "backlog" | "unstarted" | "started" | "completed" | "canceled";
 
 export function feedbackStatusFromLinearStateType(
   type: LinearStateType,

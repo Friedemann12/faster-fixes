@@ -27,13 +27,6 @@ export const loginMutation = publicProcedure
 
       // Handle authentication errors
       if (error instanceof Error) {
-        if (error.message.includes("Email not verified")) {
-          throw new TRPCError({
-            code: "FORBIDDEN",
-            message: "EMAIL_NOT_VERIFIED",
-          });
-        }
-
         if (
           error.message.includes("Invalid") ||
           error.message.includes("password")

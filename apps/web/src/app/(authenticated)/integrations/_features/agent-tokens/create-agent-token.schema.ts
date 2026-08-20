@@ -14,4 +14,4 @@ export const CreateAgentTokenSchema = z.object({
     .min(1, "Select at least one permission"),
 });
 
-export type CreateAgentTokenSchemaType = z.infer<typeof CreateAgentTokenSchema>;
+export type CreateAgentTokenInput = z.infer<typeof CreateAgentTokenSchema>;

@@ -2,7 +2,7 @@ type AssetForUrl = {
   key: string;
 };
 
-/** Public URL for an asset. All providers are served through one public base URL. */
+/** URL of an asset, served through the app's asset route. */
 export function buildAssetUrl(asset: AssetForUrl): string {
-  return `${process.env.STORAGE_PUBLIC_URL}/${asset.key}`;
+  return `/api/assets/${asset.key}`;
 }

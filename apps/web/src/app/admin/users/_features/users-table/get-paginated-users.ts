@@ -24,11 +24,6 @@ const userSelect = {
         select: {
           id: true,
           name: true,
-          subscription: {
-            select: {
-              plan: true,
-            },
-          },
         },
       },
     },

@@ -1,12 +1,10 @@
 "use server";
 
-import { enforceFeature } from "@/server/trpc/middlewares/enforce-feature";
-import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 import { UpdateProjectLinearLinkSchema } from "./update-project-linear-link.schema";
+import { protectedProcedure } from "@/server/trpc/trpc";
 
-export const updateProjectLinearLink = planAwareProcedure
-  .use(enforceFeature("linearIntegration"))
+export const updateProjectLinearLink = protectedProcedure
   .input(UpdateProjectLinearLinkSchema)
   .mutation(async ({ input, ctx }) => {
     const { prisma, session } = ctx;

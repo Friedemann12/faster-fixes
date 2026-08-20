@@ -7,7 +7,7 @@ import {
 } from "@workspace/ui/components/card";
 import { DeleteUserButton } from "./delete-user/delete-user-button.client";
 import { ImpersonateUserButton } from "./impersonate-user/impersonate-user-button.client";
-import { RequestPasswordResetButton } from "./request-password-reset/request-password-reset-button.client";
+import { SetPasswordDialog } from "./set-password/set-password-dialog.client";
 import { RevokeUserSessionsButton } from "./revoke-user-sessions/revoke-user-sessions-button.client";
 
 interface AccountCardProps {
@@ -39,9 +39,7 @@ export async function AccountCard({ userId }: AccountCardProps) {
             userId={userId}
             userEmail={user?.email || ""}
           />
-          {hasCredentialProvider && (
-            <RequestPasswordResetButton userId={userId} />
-          )}
+          {hasCredentialProvider && <SetPasswordDialog userId={userId} />}
           <RevokeUserSessionsButton userId={userId} />
           <DeleteUserButton userId={userId} />
         </div>

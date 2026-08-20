@@ -9,15 +9,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
-import { MoreHorizontal, X } from "lucide-react";
+import { Clipboard, MoreHorizontal, X } from "lucide-react";
 import { toast } from "sonner";
 
 type InvitationActionsDropdownProps = {
   invitationId: string;
+  inviteUrl: string;
 };
 
 export function InvitationActionsDropdown({
   invitationId,
+  inviteUrl,
 }: InvitationActionsDropdownProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -48,6 +50,15 @@ export function InvitationActionsDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem
+          onSelect={async () => {
+            await navigator.clipboard.writeText(inviteUrl);
+            toast.success("Invite link copied");
+          }}
+        >
+          <Clipboard className="size-4" />
+          Copy invite link
+        </DropdownMenuItem>
         <DropdownMenuItem
           onSelect={() => cancelInvitation.mutate({ invitationId })}
           variant="destructive"

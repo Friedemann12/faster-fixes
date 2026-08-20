@@ -1,16 +1,9 @@
-import {
-  type AgentScope,
-  hasScope,
-} from "@/server/api/check-agent-scope";
+import { type AgentScope, hasScope } from "@/server/api/check-agent-scope";
 import { checkRateLimit } from "@/server/api/check-rate-limit";
 import {
   type ResolvedAgentToken,
   resolveAgentToken,
 } from "@/server/api/resolve-agent-token";
-import { AGENT_API_RATE_LIMITS } from "@/server/auth/config/subscription-plans";
-import { resolveOrganizationPlan } from "@/server/auth/subscription";
-import { isCloud } from "@/utils/environment/env";
-import { prisma } from "@workspace/db";
 import { NextResponse } from "next/server";
 import { agentError } from "./agent-error";
 
@@ -40,18 +33,14 @@ export async function requireAgentAuth(
     return agentError("Insufficient permissions", "FORBIDDEN", 403);
   }
 
-  if (isCloud()) {
-    const plan = await resolveOrganizationPlan(
-      agentToken.organization.id,
-      prisma,
-    );
+  {
+    // Fixed ceiling instead of a per-plan one: this instance has no plans, but
+    // the limit still works as an abuse backstop (see ADR 0007).
     const kind = rateLimitKey === "agent:write" ? "write" : "read";
-    const max = AGENT_API_RATE_LIMITS[plan.planName][kind];
 
     const result = await checkRateLimit(
       agentToken.organization.id,
       rateLimitKey,
-      max,
     );
 
     if (!result.allowed) {

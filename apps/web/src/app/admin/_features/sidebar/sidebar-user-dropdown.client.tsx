@@ -48,7 +48,6 @@ export function SidebarUserDropdown() {
   const { isMobile } = useSidebar();
   const handleSignOut = useSignOut();
 
-  const isAdmin = session?.user.role === "admin";
   const userName =
     session?.user.firstName && session?.user.lastName
       ? `${session?.user.firstName} ${session?.user.lastName}`
@@ -104,7 +103,10 @@ export function SidebarUserDropdown() {
                     <AvatarImage src={session.user.image} alt={userName} />
                   ) : null}
                   <AvatarFallback className="rounded-lg">
-                    <Facehash name={session?.user.email ?? userName} size={32} />
+                    <Facehash
+                      name={session?.user.email ?? userName}
+                      size={32}
+                    />
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -120,18 +122,15 @@ export function SidebarUserDropdown() {
 
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/" className="flex items-center">
+              <Link href="/inbox" className="flex items-center">
                 <Home className="mr-2 size-4" />
-                <span>Back to site</span>
+                <span>Back to app</span>
               </Link>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem
-              onSelect={handleSignOut}
-              className="text-red-600"
-            >
+            <DropdownMenuItem onSelect={handleSignOut} className="text-destructive">
               <LogOut className="mr-2 size-4" />
               Sign out
             </DropdownMenuItem>

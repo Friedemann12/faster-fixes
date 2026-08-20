@@ -7,8 +7,7 @@
       "@workspace/ui/*": ["../../packages/ui/src/*"],
       "@workspace/db/*": ["../../packages/database/*"],
       "@public/*": ["./public/*"],
-      "@private/*": ["./private/*"],
-      "@collections/*": [".source/*"]
+      "@private/*": ["./private/*"]
     },
     "plugins": [
       {
@@ -21,7 +20,6 @@
     "next.config.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.mdx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

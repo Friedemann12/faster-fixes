@@ -58,14 +58,6 @@ export const getFeedback = protectedProcedure
             issueStateType: true,
           },
         },
-        jiraIssueLink: {
-          select: {
-            issueId: true,
-            issueKey: true,
-            issueUrl: true,
-            issueStatusCategory: true,
-          },
-        },
       },
     });
 
@@ -99,7 +91,6 @@ export const getFeedback = protectedProcedure
         metadata: f.metadata as Record<string, unknown> | null,
         issueLink: f.issueLink,
         linearIssueLink: f.linearIssueLink,
-        jiraIssueLink: f.jiraIssueLink,
       })),
     );
   });

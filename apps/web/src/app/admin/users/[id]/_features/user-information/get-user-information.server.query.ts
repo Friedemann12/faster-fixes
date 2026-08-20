@@ -10,11 +10,6 @@ export async function getUserInformation(userId: string) {
       role: true,
       onboardingCompleted: true,
       emailVerified: true,
-      marketingPreferences: {
-        select: {
-          acceptsNewsletter: true,
-        },
-      },
       members: {
         where: {
           organization: {

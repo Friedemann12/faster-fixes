@@ -31,6 +31,6 @@ export const UpdateProjectLinearLinkSchema = z.discriminatedUnion("kind", [
   PartialUpdateSchema,
 ]);
 
-export type UpdateProjectLinearLinkSchemaType = z.infer<
+export type UpdateProjectLinearLinkInput = z.infer<
   typeof UpdateProjectLinearLinkSchema
 >;

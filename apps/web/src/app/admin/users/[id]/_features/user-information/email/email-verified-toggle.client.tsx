@@ -4,6 +4,7 @@ import { useTRPC } from "@/lib/trpc/trpc-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Switch } from "@workspace/ui/components/switch";
 import { useState } from "react";
+import type { GetUserEmailOutput } from "./get-user-email.trpc.query";
 
 interface EmailVerifiedToggleProps {
   userId: string;
@@ -20,22 +21,25 @@ export function EmailVerifiedToggle({
   );
   const queryClient = useQueryClient();
 
-  const toggleEmailVerifiedMutation =
-    useMutation(trpc.admin.users.email.toggleVerified.mutationOptions({
+  const toggleEmailVerifiedMutation = useMutation(
+    trpc.admin.users.email.toggleVerified.mutationOptions({
       onMutate: async (newData) => {
-        await queryClient.cancelQueries(trpc.admin.users.email.get.queryFilter({ userId }));
+        await queryClient.cancelQueries(
+          trpc.admin.users.email.get.queryFilter({ userId }),
+        );
 
-        const previousData =
-          queryClient.getQueryData(trpc.admin.users.email.get.queryOptions({ userId }).queryKey);
+        const previousData = queryClient.getQueryData(
+          trpc.admin.users.email.get.queryOptions({ userId }).queryKey,
+        );
 
         queryClient.setQueryData(
           trpc.admin.users.email.get.queryOptions({ userId }).queryKey,
-          (old: any) =>
+          (old: GetUserEmailOutput | undefined) =>
             old
               ? {
-                ...old,
-                emailVerified: newData.emailVerified,
-              }
+                  ...old,
+                  emailVerified: newData.emailVerified,
+                }
               : old,
         );
 
@@ -53,12 +57,15 @@ export function EmailVerifiedToggle({
         }
       },
       onSettled: () => {
-        queryClient.invalidateQueries(trpc.admin.users.email.get.queryFilter({ userId }));
+        queryClient.invalidateQueries(
+          trpc.admin.users.email.get.queryFilter({ userId }),
+        );
       },
-    }));
+    }),
+  );
 
   return (
-    <div className="flex items-center gap-4 justify-between">
+    <div className="flex items-center justify-between gap-4">
       <label className="text-sm font-medium">
         {optimisticState ? "Email verified" : "Email not verified"}
       </label>

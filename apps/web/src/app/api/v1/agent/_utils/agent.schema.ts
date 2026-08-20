@@ -41,3 +41,9 @@ export const CreateFeedbacksSchema = z.object({
   source: z.string().trim().min(1).max(50).optional(),
   feedbacks: z.array(FeedbackItemSchema).min(1).max(100),
 });
+
+export type ListFeedbacksQueryInput = z.infer<typeof ListFeedbacksQuerySchema>;
+export type AgentUpdateFeedbackStatusInput = z.infer<
+  typeof UpdateFeedbackStatusSchema
+>;
+export type CreateFeedbacksInput = z.infer<typeof CreateFeedbacksSchema>;

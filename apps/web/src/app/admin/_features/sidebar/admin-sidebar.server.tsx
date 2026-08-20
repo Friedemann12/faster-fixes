@@ -8,7 +8,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
 } from "@workspace/ui/components/sidebar";
 import { LayoutDashboard, Users } from "lucide-react";
 import Link from "next/link";

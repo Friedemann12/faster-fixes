@@ -1,6 +1,6 @@
 import { auth } from "@/server/auth";
 import { adminProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
 import { RevokeUserSessionsSchema } from "./revoke-user-sessions.schema";
 
@@ -51,3 +51,5 @@ export const revokeUserSessions = adminProcedure
       });
     }
   });
+
+export type RevokeUserSessionsOutput = inferProcedureOutput<typeof revokeUserSessions>;

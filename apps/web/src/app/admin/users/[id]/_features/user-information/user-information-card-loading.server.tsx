@@ -24,9 +24,7 @@ export async function UserInformationCardLoading() {
             <Skeleton className="h-5 w-4/5" />
           </div>
           <div>
-            <p className="text-muted-foreground text-sm">
-              User type
-            </p>
+            <p className="text-muted-foreground text-sm">User type</p>
             <Skeleton className="h-5 w-3/5" />
           </div>
         </div>
@@ -37,9 +35,7 @@ export async function UserInformationCardLoading() {
         </div>
 
         <div className="border-t pt-4">
-          <p className="text-muted-foreground mb-2 text-sm">
-            Account details
-          </p>
+          <p className="text-muted-foreground mb-2 text-sm">Account details</p>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-muted-foreground text-sm">

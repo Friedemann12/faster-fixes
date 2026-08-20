@@ -1,8 +1,8 @@
 "use client";
 
 import { useActiveProject } from "@/app/_features/project/active-project-provider.client";
-import { DataTable } from "@/app/_features/core/datatable/data-table";
-import { DataTableColumnHeader } from "@/app/_features/core/datatable/data-table-column-header";
+import { DataTable } from "@/app/_features/core/datatable/data-table.client";
+import { DataTableColumnHeader } from "@/app/_features/core/datatable/data-table-column-header.client";
 import { useTRPC } from "@/lib/trpc/trpc-client";
 import { resolveS3Url } from "@/server/storage/resolve-s3-url";
 import { matchQueryStatus } from "@/utils/tanstack-query/match-query-status";
@@ -52,20 +52,6 @@ export function ArchiveTab() {
 
   const hardDeleteMutation = useMutation(
     trpc.authenticated.projects.feedback.hardDelete.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({ projectId }),
-        });
-        toast.success("Feedback deleted permanently.");
-      },
-      onError: () => {
-        toast.error("Failed to delete feedback.");
-      },
-    }),
-  );
-
-  const bulkHardDeleteMutation = useMutation(
-    trpc.authenticated.projects.feedback.bulkHardDelete.mutationOptions({
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: trpc.authenticated.projects.feedback.listArchived.queryKey({ projectId }),

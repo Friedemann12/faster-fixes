@@ -193,10 +193,15 @@ export function OrganizationMembersTab() {
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant="secondary">Pending</Badge>
+                <Badge variant={invitation.isExpired ? "outline" : "secondary"}>
+                  {invitation.isExpired ? "Expired" : "Pending"}
+                </Badge>
               </TableCell>
               <TableCell>
-                <InvitationActionsDropdown invitationId={invitation.id} />
+                <InvitationActionsDropdown
+                  invitationId={invitation.id}
+                  inviteUrl={invitation.inviteUrl}
+                />
               </TableCell>
             </TableRow>
           ))}

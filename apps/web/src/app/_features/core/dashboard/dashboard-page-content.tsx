@@ -1,5 +1,5 @@
-import { BreadcrumbItem } from "./breadcrumbs/breadcrumb-provider";
-import { PageBreadcrumbs } from "./breadcrumbs/page-breadcrumbs";
+import { BreadcrumbItem } from "./breadcrumbs/breadcrumb-provider.client";
+import { PageBreadcrumbs } from "./breadcrumbs/page-breadcrumbs.client";
 import { DashboardPageHeader } from "./dashboard-page-header";
 
 type DashboardPageContentProps = {

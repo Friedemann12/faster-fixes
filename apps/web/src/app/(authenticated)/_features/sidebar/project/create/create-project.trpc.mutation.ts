@@ -2,13 +2,11 @@
 
 import { generateApiKey } from "@/app/_features/project/generate-api-key";
 import { generatePublicId } from "@/app/_features/project/generate-public-id";
-import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
-import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
+import { protectedProcedure } from "@/server/trpc/trpc";
 import { TRPCError, inferProcedureOutput } from "@trpc/server";
 import { CreateProjectSchema } from "./create-project.schema";
 
-export const createProject = planAwareProcedure
-  .use(enforceLimit("projects"))
+export const createProject = protectedProcedure
   .input(CreateProjectSchema)
   .mutation(async ({ input, ctx }) => {
     const { prisma, session } = ctx;

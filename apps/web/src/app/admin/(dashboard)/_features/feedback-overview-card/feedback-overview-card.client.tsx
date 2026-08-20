@@ -32,7 +32,9 @@ export function FeedbackOverviewCard() {
               </div>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground text-xs">Avg per user</span>
+              <span className="text-muted-foreground text-xs">
+                Avg per user
+              </span>
               <span className="text-sm font-semibold">{data?.avgPerUser}</span>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import { auth } from "@/server/auth";
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
 
 export const stopImpersonate = protectedProcedure.mutation(async ({ ctx }) => {
@@ -29,3 +29,5 @@ export const stopImpersonate = protectedProcedure.mutation(async ({ ctx }) => {
     });
   }
 });
+
+export type StopImpersonateOutput = inferProcedureOutput<typeof stopImpersonate>;

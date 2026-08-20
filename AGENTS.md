@@ -56,6 +56,10 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 
 ## Project docs
 
-- Issues live in GitHub Issues at `manucoffin/faster-fixes`. See `docs/agents/issue-tracker.md`.
-- Triage labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
-- Glossary at `CONTEXT.md`; ADRs in `docs/adr/`. See `docs/agents/domain.md`.
+- Glossary at `CONTEXT.md`; ADRs in `docs/adr/`; system notes in `docs/systems/`.
+
+## This fork
+
+- Self-hosted only: no marketing pages, no transactional email, no tracking.
+- Sign-up is invite-only. Accounts come from invitation links copied out of the UI (`/invite/[invitationId]`).
+- Deployed via Coolify from prebuilt GHCR images; `docker-compose.yaml` is the source of truth for runtime env.

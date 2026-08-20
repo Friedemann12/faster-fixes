@@ -8,11 +8,10 @@
 #   BETTER_AUTH_SECRET         openssl rand -base64 32
 #   MINIO_ROOT_USER            MinIO access key
 #   MINIO_ROOT_PASSWORD        MinIO secret key
-#   MINIO_PUBLIC_URL           public URL of the MinIO S3 API, e.g. https://s3.example.com
 #   MINIO_BUCKET_NAME          bucket name, e.g. fasterfixes
 #   INNGEST_EVENT_KEY          openssl rand -hex 32
 #   INNGEST_SIGNING_KEY        openssl rand -hex 32
-#   RESEND_API_KEY             (or PLUNK_SECRET_KEY) — required for sign-up mails
+#   SIGNUP_ALLOWED_EMAILS      optional, comma-separated bootstrap allowlist
 
 services:
   ff-minio:
@@ -22,9 +21,6 @@ services:
     environment:
       MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
-      # Without this, presigned URLs are signed for the container hostname and 404 in the browser.
-      MINIO_SERVER_URL: "${MINIO_PUBLIC_URL}"
-      MINIO_API_CORS_ALLOW_ORIGIN: "${APP_URL}"
     volumes:
       - "ff_minio_data:/data"
 
@@ -45,7 +41,6 @@ services:
           sleep 2
         done
         mc mb --ignore-existing "local/$${MINIO_BUCKET_NAME}"
-        mc anonymous set download "local/$${MINIO_BUCKET_NAME}"
     environment:
       MINIO_ROOT_USER: "${MINIO_ROOT_USER}"
       MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD}"
@@ -101,13 +96,13 @@ services:
       BETTER_AUTH_URL: "${APP_URL}"
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET}"
 
-      # Server talks to MinIO in-network; browsers use the public URL.
+      # MinIO is reachable only inside the stack; browsers get objects through
+      # the app's /api/assets route, so ff-web is the only service with a domain.
       STORAGE_ENDPOINT: "http://ff-minio:9000"
       STORAGE_REGION: "${STORAGE_REGION:-us-east-1}"
       STORAGE_BUCKET_NAME: "${MINIO_BUCKET_NAME}"
       STORAGE_ACCESS_KEY_ID: "${MINIO_ROOT_USER}"
       STORAGE_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD}"
-      STORAGE_PUBLIC_URL: "${MINIO_PUBLIC_URL}/${MINIO_BUCKET_NAME}"
 
       FF_API_ORIGIN: "${APP_URL}"
       FF_API_KEY: "${FF_API_KEY:-}"
@@ -116,13 +111,21 @@ services:
       INNGEST_EVENT_KEY: "${INNGEST_EVENT_KEY}"
       INNGEST_SIGNING_KEY: "${INNGEST_SIGNING_KEY}"
 
-      RESEND_API_KEY: "${RESEND_API_KEY:-}"
-      RESEND_SEGMENT_ID: "${RESEND_SEGMENT_ID:-}"
-      PLUNK_SECRET_KEY: "${PLUNK_SECRET_KEY:-}"
+      # Bootstrap only: lets these addresses register before any invitation
+      # exists. Everyone else needs an invite link.
+      SIGNUP_ALLOWED_EMAILS: "${SIGNUP_ALLOWED_EMAILS:-}"
 
+      # Slug from the GitHub App URL, e.g. "faster-fixes-selfhosted".
+      GITHUB_APP_NAME: "${GITHUB_APP_NAME:-}"
       GITHUB_APP_ID: "${GITHUB_APP_ID:-}"
       GITHUB_PRIVATE_KEY: "${GITHUB_PRIVATE_KEY:-}"
       GITHUB_WEBHOOK_SECRET: "${GITHUB_WEBHOOK_SECRET:-}"
+
+      LINEAR_CLIENT_ID: "${LINEAR_CLIENT_ID:-}"
+      LINEAR_CLIENT_SECRET: "${LINEAR_CLIENT_SECRET:-}"
+      LINEAR_WEBHOOK_SIGNING_SECRET: "${LINEAR_WEBHOOK_SIGNING_SECRET:-}"
+      LINEAR_TOKEN_ENCRYPTION_KEY: "${LINEAR_TOKEN_ENCRYPTION_KEY:-}"
+
     depends_on:
       ff-migrate:
         condition: service_completed_successfully

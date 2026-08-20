@@ -1,13 +1,12 @@
 "use server";
 
+import { buildInviteUrl } from "@/app/_features/organization/_utils/build-invite-url";
 import { auth } from "@/server/auth";
-import { enforceLimit } from "@/server/trpc/middlewares/enforce-limit";
-import { planAwareProcedure } from "@/server/trpc/middlewares/with-plan-context";
 import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { CreateInvitationSchema } from "./create-invitation.schema";
+import { protectedProcedure } from "@/server/trpc/trpc";
 
-export const createInvitation = planAwareProcedure
-  .use(enforceLimit("seats"))
+export const createInvitation = protectedProcedure
   .input(CreateInvitationSchema)
   .mutation(async ({ input, ctx }) => {
     const { prisma, session, headers } = ctx;
@@ -38,7 +37,12 @@ export const createInvitation = planAwareProcedure
         headers,
       });
 
-      return invitation;
+      // The link is what the operator actually needs: this instance sends no
+      // invitation mail, so it is copied and forwarded by hand.
+      return {
+        ...invitation,
+        inviteUrl: buildInviteUrl(invitation.id),
+      };
     } catch (error) {
       if (error instanceof Error) {
         throw new TRPCError({

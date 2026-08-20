@@ -28,7 +28,10 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid reviewer token" },
+      { status: 403 },
+    );
   }
 
   const { allowed } = await checkRateLimit(project.id, "submit");
@@ -90,7 +93,10 @@ export async function DELETE(req: NextRequest, { params }: RouteParams) {
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid reviewer token" },
+      { status: 403 },
+    );
   }
 
   const { allowed } = await checkRateLimit(project.id, "submit");

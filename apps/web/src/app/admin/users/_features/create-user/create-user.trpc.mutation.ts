@@ -2,7 +2,7 @@
 
 import { auth } from "@/server/auth";
 import { adminProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { randomBytes } from "crypto";
 import { CreateUserSchema } from "./create-user.schema";
 import { prisma } from "@workspace/db";
@@ -16,7 +16,7 @@ export const createUser = adminProcedure
 
       // Use Better Auth to create the user
       // This atomically creates User + Account and triggers database hooks
-      // (which create MarketingPreferences + default Organization)
+      // (which create the default Organization)
       const data = await auth.api.signUpEmail({
         body: {
           name: input.name,
@@ -76,3 +76,5 @@ export const createUser = adminProcedure
       });
     }
   });
+
+export type CreateUserOutput = inferProcedureOutput<typeof createUser>;

@@ -2,7 +2,6 @@ import { checkRateLimit } from "@/server/api/check-rate-limit";
 import { resolveProject } from "@/server/api/resolve-project";
 import { validateOrigin } from "@/server/api/validate-origin";
 import { validateReviewer } from "@/server/api/validate-reviewer";
-import { checkResourceLimit } from "@/server/auth/subscription";
 import { inngest } from "@/server/inngest";
 import { getS3Client } from "@/server/storage";
 import { createAsset } from "@/server/storage/create-asset";
@@ -70,7 +69,10 @@ export async function POST(req: NextRequest) {
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid reviewer token" },
+      { status: 403 },
+    );
   }
 
   const { allowed } = await checkRateLimit(project.id, "submit");
@@ -78,24 +80,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Rate limit exceeded. Try again later." },
       { status: 429 },
-    );
-  }
-
-  const feedbackCheck = await checkResourceLimit(
-    project.organizationId,
-    "feedbacks",
-    prisma,
-  );
-  if (!feedbackCheck.allowed) {
-    const { metadata } = feedbackCheck.denial;
-    return NextResponse.json(
-      {
-        error: "Feedback limit reached for this organization's plan.",
-        code: "RESOURCE_LIMIT_EXCEEDED",
-        current: metadata.current,
-        limit: metadata.limit,
-      },
-      { status: 403 },
     );
   }
 
@@ -270,7 +254,10 @@ export async function GET(req: NextRequest) {
   const reviewerToken = req.headers.get("x-reviewer-token");
   const reviewer = await validateReviewer(reviewerToken, project.id);
   if (!reviewer) {
-    return NextResponse.json({ error: "Invalid reviewer token" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Invalid reviewer token" },
+      { status: 403 },
+    );
   }
 
   const { allowed } = await checkRateLimit(project.id, "read");

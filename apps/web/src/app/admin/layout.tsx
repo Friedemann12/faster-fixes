@@ -10,8 +10,8 @@ import {
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/breadcrumb-provider";
-import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs";
+import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/breadcrumb-provider.client";
+import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs.client";
 import { ThemeToggle } from "../_features/core/header/theme-toggle.client";
 import { AdminSidebar } from "./_features/sidebar/admin-sidebar.server";
 

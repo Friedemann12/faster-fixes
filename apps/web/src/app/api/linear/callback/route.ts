@@ -35,7 +35,9 @@ export async function GET(req: NextRequest) {
   }
 
   if (!isValidOAuthState(req, LINEAR_OAUTH_STATE_COOKIE, stateParam)) {
-    return NextResponse.redirect(`${integrationsUrl}?error=linear_state_mismatch`);
+    return NextResponse.redirect(
+      `${integrationsUrl}?error=linear_state_mismatch`,
+    );
   }
 
   const session = await auth.api.getSession({ headers: req.headers });

@@ -81,7 +81,7 @@ export const createLinearIssue = inngest.createFunction(
 
     let screenshotUrl: string | null = null;
     if (feedback.screenshot) {
-      screenshotUrl = await getSignedAssetUrl(feedback.screenshot, 3600);
+      screenshotUrl = await getSignedAssetUrl(feedback.screenshot);
     }
 
     const baseUrl = process.env.BETTER_AUTH_URL ?? process.env.BASE_URL!;

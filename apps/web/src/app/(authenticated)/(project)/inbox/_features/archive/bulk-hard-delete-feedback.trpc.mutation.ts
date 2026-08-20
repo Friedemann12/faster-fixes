@@ -2,7 +2,7 @@
 
 import { deleteAsset } from "@/server/storage/delete-asset";
 import { protectedProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import z from "zod";
 
 export const bulkHardDeleteFeedback = protectedProcedure
@@ -52,3 +52,5 @@ export const bulkHardDeleteFeedback = protectedProcedure
 
     return { count: input.feedbackIds.length };
   });
+
+export type BulkHardDeleteFeedbackOutput = inferProcedureOutput<typeof bulkHardDeleteFeedback>;

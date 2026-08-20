@@ -1,12 +1,12 @@
 import { auth } from "@/server/auth";
 import { adminProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { headers } from "next/headers";
 import { ImpersonateUserSchema } from "./impersonate-user.schema";
 
 export const impersonateUser = adminProcedure
   .input(ImpersonateUserSchema)
-  .mutation(async ({ input, ctx }) => {
+  .mutation(async ({ input }) => {
     const { userId } = input;
 
     try {
@@ -27,3 +27,5 @@ export const impersonateUser = adminProcedure
       });
     }
   });
+
+export type ImpersonateUserOutput = inferProcedureOutput<typeof impersonateUser>;

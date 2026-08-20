@@ -1,19 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { corsHeaders } from "@/server/api/cors";
-import { isCloud } from "@/utils/environment/env";
 
-// Routes only available on the official cloud-hosted instance.
-// Self-hosted users are redirected to /login for these paths.
-const CLOUD_ONLY_ROUTES = [
-  "/",
-  "/pricing",
-  "/docs",
-  "/blog",
-  "/privacy-policy",
-  "/terms",
-  "/terms-of-sale",
-];
+// The marketing pages are gone, so "/" has nothing to render. Everything that
+// is not the app itself goes to the sign-in page.
+const APP_ENTRY_POINT = "/login";
 
 // Widget-facing routes that need CORS for cross-origin browser requests
 function needsCors(pathname: string): boolean {
@@ -47,21 +38,11 @@ export function proxy(request: NextRequest) {
     return response;
   }
 
-  // Cloud/self-hosted proxy
-  if (!isCloud() && isCloudOnlyRoute(pathname)) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL(APP_ENTRY_POINT, request.url));
   }
 
   return NextResponse.next();
-}
-
-function isCloudOnlyRoute(pathname: string): boolean {
-  // Exact match or prefix match for nested routes (e.g. /docs/getting-started)
-  return CLOUD_ONLY_ROUTES.some(
-    (route) =>
-      pathname === route ||
-      (route !== "/" && pathname.startsWith(`${route}/`)),
-  );
 }
 
 export const config = {

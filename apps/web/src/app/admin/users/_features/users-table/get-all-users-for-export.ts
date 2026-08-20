@@ -45,11 +45,6 @@ export const getAllUsersForExport = adminProcedure
           select: {
             organization: {
               select: {
-                subscription: {
-                  select: {
-                    plan: true,
-                  },
-                },
               },
             },
           },

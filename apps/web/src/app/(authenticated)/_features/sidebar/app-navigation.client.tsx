@@ -1,7 +1,5 @@
 "use client";
 
-import { usePlanGate } from "@/app/_features/subscription/use-plan-gate";
-import { isCloud } from "@/utils/environment/env";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -10,7 +8,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@workspace/ui/components/sidebar";
-import { Blocks, CreditCard, Settings2, Sparkles } from "lucide-react";
+import { Blocks, Settings2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -21,7 +19,6 @@ const applicationItems = [
 export function AppNavigation() {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
-  const { isFreePlan } = usePlanGate();
 
   return (
     <>
@@ -64,27 +61,6 @@ export function AppNavigation() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {isCloud() && (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={pathname.startsWith("/account/billing")}
-                tooltip={isFreePlan ? "Upgrade" : "Billing"}
-              >
-                <Link
-                  href="/account/billing"
-                  onClick={() => setOpenMobile(false)}
-                >
-                  {isFreePlan ? (
-                    <Sparkles className="text-amber-500" />
-                  ) : (
-                    <CreditCard />
-                  )}
-                  <span>{isFreePlan ? "Upgrade" : "Billing"}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
         </SidebarMenu>
       </SidebarGroup>
     </>

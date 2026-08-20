@@ -6,6 +6,6 @@ export const UpdateProjectLinkSchema = z.object({
   defaultLabels: z.array(z.string()).optional(),
 });
 
-export type UpdateProjectLinkSchemaType = z.infer<
+export type UpdateProjectLinkInput = z.infer<
   typeof UpdateProjectLinkSchema
 >;

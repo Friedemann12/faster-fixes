@@ -1,5 +1,9 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- Screenshots arrive with unknown
+   dimensions and are streamed from the app's own asset route; next/image would
+   add an optimizer round-trip without any layout benefit. */
+
 import {
   Dialog,
   DialogContent,

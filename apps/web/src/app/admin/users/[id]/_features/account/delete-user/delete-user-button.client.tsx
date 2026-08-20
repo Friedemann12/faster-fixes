@@ -26,20 +26,22 @@ export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const deleteUserMutation = useMutation(trpc.admin.users.delete.mutationOptions({
-    onSuccess: () => {
-      toast.success("Success", {
-        description: "User deleted successfully",
-      });
-      queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
-      router.push("/admin/users");
-    },
-    onError: (error) => {
-      toast.error("Error", {
-        description: error.message || "An error occurred",
-      });
-    },
-  }));
+  const deleteUserMutation = useMutation(
+    trpc.admin.users.delete.mutationOptions({
+      onSuccess: () => {
+        toast.success("Success", {
+          description: "User deleted successfully",
+        });
+        queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
+        router.push("/admin/users");
+      },
+      onError: (error) => {
+        toast.error("Error", {
+          description: error.message || "An error occurred",
+        });
+      },
+    }),
+  );
 
   const handleDelete = () => {
     deleteUserMutation.mutate({ userId });
@@ -48,10 +50,7 @@ export const DeleteUserButton = ({ userId }: DeleteUserButtonProps) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button
-          variant="destructive"
-          disabled={deleteUserMutation.isPending}
-        >
+        <Button variant="destructive" disabled={deleteUserMutation.isPending}>
           Delete account
         </Button>
       </AlertDialogTrigger>

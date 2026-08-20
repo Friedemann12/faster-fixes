@@ -43,9 +43,7 @@ export function CreateUserDialog() {
         queryClient.invalidateQueries(trpc.admin.users.list.queryFilter());
       },
       onError: (error) => {
-        toast.error(
-          error.message || "Failed to create user",
-        );
+        toast.error(error.message || "Failed to create user");
       },
     }),
   );
@@ -162,9 +160,7 @@ export function CreateUserDialog() {
                 disabled={!form.formState.isValid}
                 pending={createUserMutation.isPending}
               >
-                {createUserMutation.isPending
-                  ? "Creating..."
-                  : "Create user"}
+                {createUserMutation.isPending ? "Creating..." : "Create user"}
               </ActionButton>
             </DialogFooter>
           </form>

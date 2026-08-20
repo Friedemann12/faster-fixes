@@ -1,7 +1,6 @@
 import { loginUrl, onboardingUrl } from "@/app/_constants/routes";
 import { ActiveProjectProvider } from "@/app/_features/project/active-project-provider.client";
 import { auth } from "@/server/auth";
-import { isCloud } from "@/utils/environment/env";
 import { LayoutParams } from "@/types/next";
 import { prisma } from "@workspace/db";
 import {
@@ -12,10 +11,9 @@ import {
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/breadcrumb-provider";
-import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs";
+import { BreadcrumbProvider } from "../_features/core/dashboard/breadcrumbs/breadcrumb-provider.client";
+import { Breadcrumbs } from "../_features/core/dashboard/breadcrumbs/breadcrumbs.client";
 import { ThemeToggle } from "../_features/core/header/theme-toggle.client";
-import { FeedbackButton } from "./_features/feedback/feedback-button.client";
 import { HeaderProjectSwitcher } from "./_features/header/header-project-switcher.client";
 import { AuthenticatedSidebar } from "./_features/sidebar/authenticated-sidebar.server";
 
@@ -64,7 +62,6 @@ export default async function AuthenticatedLayout({ children }: LayoutParams) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  {isCloud() && <FeedbackButton />}
                   <ThemeToggle variant="ghost" size="icon-sm" />
                 </div>
               </div>

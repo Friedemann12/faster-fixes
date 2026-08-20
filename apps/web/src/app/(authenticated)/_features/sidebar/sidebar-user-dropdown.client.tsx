@@ -27,7 +27,6 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { Facehash } from "facehash";
 import {
   ChevronsUpDown,
-  CreditCard,
   LayoutDashboard,
   LogOut,
   Settings2,
@@ -144,15 +143,6 @@ export function SidebarUserDropdown() {
                 </Link>
               </DropdownMenuItem>
 
-              <DropdownMenuItem asChild>
-                <Link
-                  href="/account/billing"
-                  className="flex items-center"
-                >
-                  <CreditCard className="mr-2 size-4" />
-                  <span>Billing</span>
-                </Link>
-              </DropdownMenuItem>
             </DropdownMenuGroup>
 
             {isAdmin && (

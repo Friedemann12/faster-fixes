@@ -6,10 +6,8 @@ import { admin, lastLoginMethod } from "better-auth/plugins";
 import { after } from "next/server";
 import { databaseHooks } from "./config/database-hooks";
 import { emailAndPassword } from "./config/email-and-password";
-import { emailVerification } from "./config/email-verification";
 import { customSessionPlugin } from "./plugins/custom-session";
 import { organizationPlugin } from "./plugins/organization";
-import { stripePlugin } from "./plugins/stripe";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -20,7 +18,6 @@ export const auth = betterAuth({
     `https://www.${process.env.DOMAIN_NAME}`,
   ],
   emailAndPassword,
-  emailVerification,
   databaseHooks,
   rateLimit: {
     enabled: true,
@@ -47,6 +44,10 @@ export const auth = betterAuth({
   user: {
     changeEmail: {
       enabled: true,
+      // Better Auth rejects /change-email unless it can either send a
+      // confirmation or update without one. With no mailer the unverified path
+      // is the only one left, which is why emailVerified stays false here.
+      updateEmailWithoutVerification: true,
     },
     deleteUser: {
       enabled: true,
@@ -65,7 +66,6 @@ export const auth = betterAuth({
     customSessionPlugin,
     admin(),
     organizationPlugin,
-    stripePlugin,
     lastLoginMethod(),
     nextCookies(), // must be last plugin of the array
   ],

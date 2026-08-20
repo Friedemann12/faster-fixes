@@ -27,7 +27,6 @@ type FeedbackDetailPanelProps = {
   projectId: string;
   hasGitHubLink?: boolean;
   hasLinearLink?: boolean;
-  hasJiraLink?: boolean;
 };
 
 function formatBrowserMeta(f: FeedbackItem) {
@@ -51,7 +50,6 @@ export function FeedbackDetailPanel({
   projectId,
   hasGitHubLink = false,
   hasLinearLink = false,
-  hasJiraLink = false,
 }: FeedbackDetailPanelProps) {
   if (!feedback) return null;
 
@@ -196,10 +194,8 @@ export function FeedbackDetailPanel({
             projectId={projectId}
             hasGitHubLink={hasGitHubLink}
             hasLinearLink={hasLinearLink}
-            hasJiraLink={hasJiraLink}
             githubIssueLink={feedback.issueLink}
             linearIssueLink={feedback.linearIssueLink}
-            jiraIssueLink={feedback.jiraIssueLink}
           />
 
           <AssigneeSelect

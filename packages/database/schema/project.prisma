@@ -17,8 +17,6 @@ model Project {
   feedback     Feedback[]
   gitHubLink   ProjectGitHubLink?
   linearLink   ProjectLinearLink?
-  jiraLink     ProjectJiraLink?
-  slackLink    ProjectSlackLink?
 
   @@index([organizationId])
   @@index([publicId])
@@ -95,8 +93,6 @@ model Feedback {
 
   issueLink       FeedbackIssueLink?
   linearIssueLink FeedbackLinearIssueLink?
-  jiraIssueLink   FeedbackJiraIssueLink?
-  slackMessage    FeedbackSlackMessage?
 
   @@index([projectId])
   @@index([reviewerId])

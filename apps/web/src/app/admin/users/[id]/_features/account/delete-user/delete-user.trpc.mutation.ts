@@ -1,5 +1,5 @@
 import { adminProcedure } from "@/server/trpc/trpc";
-import { TRPCError } from "@trpc/server";
+import { inferProcedureOutput, TRPCError } from "@trpc/server";
 import { DeleteUserSchema } from "./delete-user.schema";
 
 export const deleteUser = adminProcedure
@@ -30,3 +30,5 @@ export const deleteUser = adminProcedure
 
     return { success: true, user: deletedUser };
   });
+
+export type DeleteUserOutput = inferProcedureOutput<typeof deleteUser>;
